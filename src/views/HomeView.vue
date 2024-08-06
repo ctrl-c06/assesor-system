@@ -70,6 +70,10 @@ const markAsSelected = (file) => {
     );
   } else {
     selectedFiles.value = [...selectedFiles.value, file];
+    axios.post(`http://localhost:8080/generate-thumbnails`, {
+      files : [file.name]
+    }).then((response) => {
+    });
   }
 };
 
@@ -90,7 +94,7 @@ const mergeAll = () => {
     .then((response) => {
       if (response.status === 200) {
         getDirectoryFiles().then((data) => {
-          // look for a file with name merged_output.pdf then push it to the top of the list
+          // push the newly merged file to the top of the list so the user can view it first
           let index = data.findIndex((file) => file.name === "merged_output.pdf");
           if (index !== -1) {
             let mergedFile = data.splice(index, 1);
@@ -120,6 +124,8 @@ const viewFiles = () => {
       }
     });
 };
+
+
 
 const submitRecord = () => {
   createRecord(assign.value).then((data) => {
@@ -209,6 +215,24 @@ const onMunicipalitySearch = (search, loading) => {
   }
 };
 
+const getThumbnailUrl = (name) => {
+  return `http://localhost:8080/thumbnail?file=${name}`;
+};
+
+
+const refetchThumbnails = () => {
+  selectedFiles.value.forEach((file) => {
+    file.cache = new Date().getTime();
+  });
+};
+
+
+
+const viewClickedPDF = (file) => {
+  console.log(file);
+};
+
+
 onMounted(() => {
   getDirectoryFiles().then((data) => (files.value = data));
 });
@@ -236,7 +260,9 @@ onMounted(() => {
           ></button>
         </div>
         <div class="offcanvas-body">
-          <div v-for="f in selectedFiles" :key="f">
+          <div v-for="(f) in selectedFiles" :key="f"
+            @click="downloadFile(f.name)"
+          >
             <div class="card cursor-pointer border border-primary">
               <div class="card-text p-1 text-center fw-bold text-uppercase">
                 {{ removeFileExtension(f.name) }}
@@ -245,9 +271,9 @@ onMounted(() => {
                 <div class="d-flex justify-content-between align-items-center">
                   <div class="d-flex align-items-center">
                     <img
-                      src="https://img.yumpu.com/52502672/1/500x640/pdf-samplepdf.jpg"
-                      class="img-fluid"
-                      alt=""
+                        :src="`http://localhost:8080/thumbnail?file=${f.name}&t=${f.cache}`"
+                        class="img-fluid"
+                        alt=""
                     />
                   </div>
                 </div>
@@ -277,6 +303,7 @@ onMounted(() => {
         class="btn btn-info rounded-circle position-fixed bottom-0 end-0 m-4 p-0 py-2 px-2 border border-primary shadow shadow-lg"
         style="z-index: 1000"
         data-bs-toggle="offcanvas"
+        @click="refetchThumbnails"
         href="#selectedFilesCanvas"
       >
         <svg
@@ -366,7 +393,7 @@ onMounted(() => {
         aria-labelledby="assignFileModalLabel"
         aria-hidden="true"
       >
-        <div class="modal-dialog modal-xl" style="min-width: 95vw">
+        <div class="modal-dialog modal-xl" style="min-width: 95vw; ">
           <div class="modal-content">
             <div class="modal-header">
               <h5 class="modal-title text-uppercase" id="assignFileModalLabel">
@@ -381,14 +408,18 @@ onMounted(() => {
             </div>
             <div class="modal-body">
               <div class="row">
-                <div class="col-lg-12">
+                <div class="col-lg-6">
                   <form id="assignFileForm">
                     <div>
                       <div class="form-group">
                         <label
                           for="taxDeclarationNo"
                           class="form-label fw-bold text-uppercase text-dark"
-                          >Tax Declaration No:</label
+                          >
+                            <small>
+                              Tax Declaration No:
+                            </small>
+                          </label
                         >
                         <input
                           type="text"
@@ -402,7 +433,12 @@ onMounted(() => {
                         <label
                           for="propertyIdentificationNo"
                           class="form-label text-dark text-uppercase fw-bold"
-                          >Property Identification No:</label
+                          >
+                        <small>
+                          Property Identification No:
+
+                        </small>
+                          </label
                         >
                         <input
                           type="text"
@@ -416,7 +452,11 @@ onMounted(() => {
                         <label
                           for="areaInHectares"
                           class="form-label text-dark text-uppercase fw-bold"
-                          >Lot No:</label
+                          >
+                          <small>
+                            Lot No:
+                          </small>
+                          </label
                         >
                         <input
                           type="text"
@@ -430,8 +470,12 @@ onMounted(() => {
                         <label
                           for="declaredOwner"
                           class="form-label text-dark text-uppercase fw-bold"
-                          >Declared Owner:</label
-                        >
+                          >
+                          
+                          <small>
+                            Declared Owner :
+                          </small>
+                          </label>
                         <input
                           type="text"
                           id="declaredOwner"
@@ -444,7 +488,11 @@ onMounted(() => {
                         <label
                           for="revision"
                           class="form-label text-dark text-uppercase fw-bold"
-                          >TAX EFFECTIVITY:</label
+                          >
+                            <small>
+                              TAX EFFECTIVITY:
+                            </small>
+                          </label
                         >
                         <select
                           name=""
@@ -458,7 +506,11 @@ onMounted(() => {
                         <label
                           for="municipality"
                           class="form-label text-dark text-uppercase fw-bold"
-                          >Municipality:</label
+                          >
+                            <small>
+                              Municipality:
+                            </small>
+                          </label
                         >
                         <v-select
                           label="name"
@@ -477,7 +529,12 @@ onMounted(() => {
                         <label
                           for="municipality"
                           class="form-label text-dark text-uppercase fw-bold"
-                          >Barangay:</label
+                          >
+                            <small>
+                              Barangay:
+                            </small>
+                          
+                          </label
                         >
                         <v-select
                           label="name"
@@ -494,6 +551,13 @@ onMounted(() => {
                       </div>
                     </div>
                   </form>
+                </div>
+                <div class="col-lg-6">
+                    <img
+                        :src="`http://localhost:8080/thumbnail?file=${selectedFile.name}`"
+                      style="height : 50vh;"
+                        class="img-fluid"
+                    />
                 </div>
               </div>
             </div>
