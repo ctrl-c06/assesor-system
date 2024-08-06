@@ -88,6 +88,39 @@ const logout = () => {
             </RouterLink>
           </li>
           <li class="sidebar-item">
+            <a
+              data-bs-target="#maintenance"
+              data-bs-toggle="collapse"
+              class="sidebar-link"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                fill="currentColor"
+                class="bi bi-card-checklist"
+                viewBox="0 0 16 16"
+              >
+                <path
+                  d="M14.5 3a.5.5 0 0 1 .5.5v9a.5.5 0 0 1-.5.5h-13a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5zm-13-1A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h13a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 14.5 2z"
+                />
+                <path
+                  d="M7 5.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5m-1.496-.854a.5.5 0 0 1 0 .708l-1.5 1.5a.5.5 0 0 1-.708 0l-.5-.5a.5.5 0 1 1 .708-.708l.146.147 1.146-1.147a.5.5 0 0 1 .708 0M7 9.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5m-1.496-.854a.5.5 0 0 1 0 .708l-1.5 1.5a.5.5 0 0 1-.708 0l-.5-.5a.5.5 0 0 1 .708-.708l.146.147 1.146-1.147a.5.5 0 0 1 .708 0"
+                />
+              </svg>
+              <span class="align-middle">Maintenance</span>
+            </a>
+            <ul
+              id="maintenance"
+              class="sidebar-dropdown list-unstyled collapse show"
+              data-bs-parent="#sidebar"
+            >
+              <li class="sidebar-item">
+                <Router-Link class="sidebar-link" to="/revisions">Revisions</Router-Link>
+              </li>
+            </ul>
+          </li>
+          <li class="sidebar-item">
             <a data-bs-target="#pages" data-bs-toggle="collapse" class="sidebar-link">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -108,14 +141,16 @@ const logout = () => {
             </a>
             <ul
               id="pages"
-              class="sidebar-dropdown list-unstyled collapse"
+              class="sidebar-dropdown list-unstyled collapse show"
               data-bs-parent="#sidebar"
             >
               <li class="sidebar-item">
                 <Router-Link class="sidebar-link" to="/">File Scans</Router-Link>
               </li>
               <li class="sidebar-item">
-                <Router-Link class="sidebar-link" to="/history">Record History</Router-Link>
+                <Router-Link class="sidebar-link" to="/history"
+                  >Record History</Router-Link
+                >
               </li>
             </ul>
           </li>

@@ -219,11 +219,13 @@ onMounted(() => fetchTaxDeclarations());
 
 <template>
   <layout>
-    <h4 class="text-uppercase fw-bold">
-      Records
-      <span class="fw-bold text-primary">[ {{ currentPage }} ]</span>
-    </h4>
-    <div class="border my-2 border-primary"></div>
+    <template #title>
+      <h4 class="text-uppercase fw-bold">
+        Records
+        <span class="fw-bold text-primary">[ {{ totalPages }} ]</span>
+      </h4>
+      <div class="border my-2 border-primary"></div>
+    </template>
 
     <div>
       <div
@@ -561,7 +563,7 @@ onMounted(() => fetchTaxDeclarations());
     </div>
     <div class="bg-light">
       <div class="row">
-        <div class="col-lg-11">
+        <div class="col-lg-11 mt-2">
           <label for="fileSearch" class="form-label text-dark fw-bold">Search:</label>
           <input
             type="text"
