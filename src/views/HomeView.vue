@@ -33,6 +33,8 @@ const selectedFile = ref({
 const fileSearch = ref("");
 const selectedFiles = ref([]);
 
+const revisions = ref([]);
+
 const assign = ref({
   taxDeclarationNo: "",
   declaredOwner: "",
@@ -242,7 +244,19 @@ const assignFile = (file) => {
   }, 700);
 };
 
+const getRevisions = () => {
+  axios
+    .get("http://localhost:8081/tax-revisions")
+    .then((response) => {
+      revisions.value = response.data;
+    })
+    .catch((error) => {
+      console.error(error);
+    });
+};
+
 onMounted(() => {
+  getRevisions();
   getDirectoryFiles().then((data) => (files.value = data));
 });
 </script>
@@ -553,7 +567,16 @@ onMounted(() => {
                           id=""
                           class="form-control"
                           v-model="assign.taxEffectivity"
-                        ></select>
+                        >
+                          <option
+                            :value="revision.RevisionNumber"
+                            v-for="revision in revisions"
+                            :key="revision"
+                          >
+                            {{ revision.RevisionNumber }} ({{ revision.fromYear }} -
+                            {{ revision.toYear }})
+                          </option>
+                        </select>
                       </div>
 
                       <div class="form-group w-100 mb-3 mt-2">

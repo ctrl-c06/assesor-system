@@ -573,7 +573,7 @@ onMounted(() => fetchTaxDeclarations());
             @keypress.enter.prevent="fetchTaxDeclarations(1, pageSize)"
           />
         </div>
-        <div class="col-lg-1">
+        <div class="col-lg-1 mt-2">
           <div class="">
             <label for="pageSize" class="form-label text-dark fw-bold"
               >Show Entries:</label
@@ -595,48 +595,85 @@ onMounted(() => fetchTaxDeclarations());
     <table class="table table-bordered">
       <thead>
         <tr>
-          <th class="text-uppercase bg-dark text-white border text-center">
-            Tax Declaration No
+          <th
+            class="text-uppercase bg-dark text-white border text-center border border-dark"
+          >
+            <small> Tax Declaration No </small>
           </th>
-          <th class="text-uppercase bg-dark text-white border text-center">
-            Declared Owner
+          <th
+            class="text-uppercase bg-dark text-white border border text-center border border-dark"
+          >
+            <small> Property Identification </small>
           </th>
-          <th class="text-uppercase bg-dark text-white border border text-center">
-            Area in Hectares
+          <th
+            class="text-uppercase bg-dark text-white border border text-center border border-dark"
+          >
+            <small> Lot No </small>
           </th>
-          <th class="text-uppercase bg-dark text-white border border text-center">
-            Property Identification
+          <th
+            class="text-uppercase bg-dark text-white border text-center border border-dark"
+          >
+            <small> Declared Owner </small>
           </th>
-          <th class="text-uppercase bg-dark text-white border text-center">Revision</th>
-          <th class="text-uppercase bg-dark text-white border text-center">Location</th>
-          <th class="text-uppercase bg-dark text-white border text-center">Created At</th>
-          <th class="text-uppercase bg-dark text-white border text-center">Actions</th>
+          <th
+            class="text-uppercase bg-dark text-white border border text-center border border-dark"
+          >
+            <small> Area in Hectares </small>
+          </th>
+
+          <th
+            class="text-uppercase bg-dark text-white border text-center border border-dark"
+          >
+            <small> Revision </small>
+          </th>
+          <th
+            class="text-uppercase bg-dark text-white border text-center border border-dark"
+          >
+            <small> Location </small>
+          </th>
+          <th
+            class="text-uppercase bg-dark text-white border text-center border border-dark"
+          >
+            <small> Created At </small>
+          </th>
+          <th
+            class="text-uppercase bg-dark text-white border text-center border border-dark"
+          >
+            <small> Actions </small>
+          </th>
         </tr>
       </thead>
       <tbody class="bg-white">
         <tr v-for="declaration in taxDeclarations" :key="declaration.id">
           <td class="fw-bold">{{ declaration.taxDeclarationNo }}</td>
-          <td>{{ declaration.declaredOwner }}</td>
-          <td class="text-center">{{ declaration.areaInHectares }}</td>
           <td class="fw-bold">{{ declaration.propertyIdentificationNo }}</td>
+          <td class="fw-bold">{{ declaration.lotNo }}</td>
+          <td class="text-uppercase">
+            <div class="ms-3">
+              {{ declaration.declaredOwner }}
+            </div>
+          </td>
+          <td class="text-center">{{ declaration.areaInHectares }}</td>
           <td class="text-center">{{ declaration.revision }}</td>
-          <td class="text-center">
-            {{ declaration.municipality?.name }} / {{ declaration.barangay?.name }}
+          <td class="text-start">
+            <span class="ms-3">
+              {{ declaration.municipality?.name }} / {{ declaration.barangay?.name }}
+            </span>
           </td>
           <td class="text-center">
             {{ moment(declaration.createdAt).format("YYYY-MM-DD HH:mm:ss") }}
           </td>
           <td class="text-center">
             <div class="btn-group" role="group" aria-label="Basic example">
-              <!-- <button
+              <button
                 type="button"
-                class="btn btn-success"
+                class="btn btn-primary"
                 data-bs-toggle="modal"
                 data-bs-target="#assignFileModal"
                 @click="editRecord(declaration)"
               >
-                Revision
-              </button> -->
+                Attachments
+              </button>
               <button
                 type="button"
                 class="btn btn-success"
@@ -645,6 +682,15 @@ onMounted(() => fetchTaxDeclarations());
                 @click="editRecord(declaration)"
               >
                 Edit
+              </button>
+              <button
+                type="button"
+                class="btn btn-success"
+                data-bs-target="#editRecordModal"
+                data-bs-toggle="modal"
+                @click="editRecord(declaration)"
+              >
+                History
               </button>
               <button
                 v-if="declaration.filePath"
