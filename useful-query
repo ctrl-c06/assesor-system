@@ -1,0 +1,100 @@
+-- BACKWARD
+
+WITH tax_chain AS (
+    -- Start with the current tax declaration
+    SELECT 
+        id, 
+        tax_declaration_no, 
+        previous_tax_declaration_no, 
+        declared_owner, 
+        lot_no, 
+        property_identification_no, 
+        file_path, 
+        barangay_id, 
+        municipality_id, 
+        tax_revision_id, 
+        created_at, 
+        updated_at
+    FROM 
+        tax_declarations
+    WHERE 
+        tax_declaration_no = '15-01756-235'
+    
+    UNION ALL
+    
+    -- Recursively find previous tax declarations
+    SELECT 
+        td.id, 
+        td.tax_declaration_no, 
+        td.previous_tax_declaration_no, 
+        td.declared_owner, 
+        td.lot_no, 
+        td.property_identification_no, 
+        td.file_path, 
+        td.barangay_id, 
+        td.municipality_id, 
+        td.tax_revision_id, 
+        td.created_at, 
+        td.updated_at
+    FROM 
+        tax_declarations td
+    INNER JOIN 
+        tax_chain tc ON td.tax_declaration_no = tc.previous_tax_declaration_no
+)
+SELECT 
+    * 
+FROM 
+    tax_chain
+ORDER BY 
+    created_at;
+
+
+
+-- ONWARDS
+WITH tax_chain AS (
+    -- Start with the current tax declaration
+    SELECT 
+        id, 
+        tax_declaration_no, 
+        previous_tax_declaration_no, 
+        declared_owner, 
+        lot_no, 
+        property_identification_no, 
+        file_path, 
+        barangay_id, 
+        municipality_id, 
+        tax_revision_id, 
+        created_at, 
+        updated_at
+    FROM 
+        tax_declarations
+    WHERE 
+        tax_declaration_no = '15-01756-233'
+    
+    UNION ALL
+    
+    -- Recursively find next tax declarations
+    SELECT 
+        td.id, 
+        td.tax_declaration_no, 
+        td.previous_tax_declaration_no, 
+        td.declared_owner, 
+        td.lot_no, 
+        td.property_identification_no, 
+        td.file_path, 
+        td.barangay_id, 
+        td.municipality_id, 
+        td.tax_revision_id, 
+        td.created_at, 
+        td.updated_at
+    FROM 
+        tax_declarations td
+    INNER JOIN 
+        tax_chain tc ON tc.tax_declaration_no = td.previous_tax_declaration_no
+)
+SELECT 
+    * 
+FROM 
+    tax_chain
+ORDER BY 
+    created_at;

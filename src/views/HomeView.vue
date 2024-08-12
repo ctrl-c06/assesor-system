@@ -24,6 +24,8 @@ const router = useRouter();
 const $toast = useToast();
 const barangays = ref([]);
 const municipalities = ref([]);
+const owners = ref([]);
+const previousDeclarations = ref([]);
 
 const files = ref([]);
 const selectedFile = ref({
@@ -37,10 +39,11 @@ const revisions = ref([]);
 
 const assign = ref({
   taxDeclarationNo: "",
+  previousTaxDeclarationNo: "",
   declaredOwner: "",
   lotNo: "",
   propertyIdentificationNo: "",
-  taxEffectivity: "",
+  taxRevision: "",
   barangay: "",
   municipality: "",
 });
@@ -255,6 +258,46 @@ const getRevisions = () => {
     });
 };
 
+const searchOwner = (loading, search) => {
+  axios
+    .get(`http://localhost:8081/tax-declarations/unique/owner?query=${search}`)
+    .then((response) => {
+      owners.value = response.data;
+      loading(false);
+    })
+    .catch((error) => {
+      console.error(error);
+      loading(false);
+    });
+};
+
+const onOwnerSearch = (search, loading) => {
+  if (search.length) {
+    loading(true);
+    searchOwner(loading, search);
+  }
+};
+
+const searchDeclarationNo = (loading, search) => {
+  axios
+    .get(`http://localhost:8081/tax-declarations/unique/declarationNo?query=${search}`)
+    .then((response) => {
+      previousDeclarations.value = response.data;
+      loading(false);
+    })
+    .catch((error) => {
+      console.error(error);
+      loading(false);
+    });
+};
+
+const onTaxDeclarationNoSearch = (search, loading) => {
+  if (search.length) {
+    loading(true);
+    searchDeclarationNo(loading, search);
+  }
+};
+
 onMounted(() => {
   getRevisions();
   getDirectoryFiles().then((data) => (files.value = data));
@@ -467,7 +510,6 @@ onMounted(() => {
                           alt="Scanned File"
                           @on-zoom="zoom = true"
                           @off-zoom="zoom = false"
-                          :style="{ width: '400px', height: '20px' }"
                         />
                       </div>
                       <button class="btn btn-dark shadow shadow-lg px-2">
@@ -495,6 +537,26 @@ onMounted(() => {
                     <div
                       class="d-flex flex-column justify-content-center align-items-center"
                     >
+                      <div class="form-group w-100 mb-3 mt-2">
+                        <label
+                          for="declaredOwner"
+                          class="form-label text-dark text-uppercase fw-bold"
+                        >
+                          Previous Declaration No :
+                        </label>
+                        <v-select
+                          label="name"
+                          :filterable="false"
+                          :options="previousDeclarations"
+                          @search="onTaxDeclarationNoSearch"
+                          :taggable="true"
+                          v-model="assign.previousTaxDeclarationNo"
+                          style="color: black"
+                          class="bg-white text-uppercase"
+                        >
+                        </v-select>
+                      </div>
+
                       <div class="form-group mb-3 w-100">
                         <label
                           for="taxDeclarationNo"
@@ -547,12 +609,20 @@ onMounted(() => {
                         >
                           Declared Owner :
                         </label>
-                        <input
-                          type="text"
-                          id="declaredOwner"
-                          class="form-control"
+                        <v-select
+                          label="name"
+                          :filterable="false"
+                          :options="owners"
+                          @search="onOwnerSearch"
+                          :taggable="true"
                           v-model="assign.declaredOwner"
-                        />
+                          style="color: black"
+                          class="bg-white text-uppercase"
+                        >
+                          <template #option="{ name }">
+                            <h5 class="text-dark">{{ name }}</h5>
+                          </template>
+                        </v-select>
                       </div>
 
                       <div class="form-group w-100 mb-3 mt-2">
@@ -566,10 +636,10 @@ onMounted(() => {
                           name=""
                           id=""
                           class="form-control"
-                          v-model="assign.taxEffectivity"
+                          v-model="assign.taxRevision"
                         >
                           <option
-                            :value="revision.RevisionNumber"
+                            :value="revision"
                             v-for="revision in revisions"
                             :key="revision"
                           >

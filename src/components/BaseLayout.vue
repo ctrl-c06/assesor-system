@@ -118,6 +118,9 @@ const logout = () => {
               <li class="sidebar-item">
                 <Router-Link class="sidebar-link" to="/revisions">Revisions</Router-Link>
               </li>
+              <li class="sidebar-item">
+                <Router-Link class="sidebar-link" to="/revisions">Users</Router-Link>
+              </li>
             </ul>
           </li>
           <li class="sidebar-item">

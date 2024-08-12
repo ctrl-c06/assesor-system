@@ -4,6 +4,7 @@ import LoginView from '../views/LoginView.vue'
 import DashboardView from '../views/DashboardView.vue'
 import RecordHistoryView from '../views/RecordHistoryView.vue'
 import RevisionView from '@/views/RevisionView.vue'
+import TaxDeclarationHistoryView from '@/views/TaxDeclarationHistoryView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -17,6 +18,11 @@ const router = createRouter({
       path: '/history',
       name: 'history',
       component: RecordHistoryView
+    },
+    {
+      path: '/tax-declaration/:lotNo',
+      name: 'tax-declaration',
+      component: TaxDeclarationHistoryView
     },
     {
       path: '/dashboard',
