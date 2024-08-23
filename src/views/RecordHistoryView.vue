@@ -1,6 +1,6 @@
 <script setup>
 import Layout from "@/components/BaseLayout.vue";
-import { onMounted, ref, computed, watch } from "vue";
+import { onMounted, ref, computed, watch, inject } from "vue";
 import axios from "axios";
 import moment from "moment";
 import { downloadFile } from "@/services/file";
@@ -8,8 +8,13 @@ import { createRecord } from "@/services/record";
 import { useToast } from "vue-toast-notification";
 import alertify from "alertifyjs";
 
+import { getDirectoryFiles } from "@/services/file";
+
+const socket = inject("socket");
 const $toast = useToast();
 
+const files = ref([]);
+const tags = ref([]);
 const owners = ref([]);
 const barangays = ref([]);
 const municipalities = ref([]);
@@ -32,6 +37,14 @@ const pageSize = ref(5);
 const totalPages = ref(1);
 const isFetching = ref(false);
 const totalRecords = ref(0);
+
+const selectedDeclaration = ref(null);
+
+socket.addEventListener("message", (event) => {
+  if (event.data.includes("created") || event.data.includes("deleted")) {
+    getDirectoryFiles().then((data) => (files.value = data));
+  }
+});
 
 const fetchTaxDeclarations = async (page = currentPage.value, size = pageSize.value) => {
   isFetching.value = true;
@@ -285,6 +298,49 @@ const actionTakenFresh = (time) => {
   return diff < 60;
 };
 
+const getTags = () => {
+  axios
+    .get("http://localhost:8081/tags")
+    .then((response) => {
+      tags.value = response.data;
+    })
+    .catch((error) => {
+      console.error(error);
+    });
+};
+
+const addAttachments = (declaration) => {
+  selectedDeclaration.value = declaration;
+  const modal = new bootstrap.Modal(document.getElementById("addAttachments"));
+  Promise.all([getDirectoryFiles(), getTags()]).then((data) => {
+    files.value = data[0];
+
+    files.value?.forEach((file) => {
+      file.tag = "";
+      file.oldFileName = file.name;
+      file.name = removeExtension(file.name);
+    });
+
+    tags.value = data[1];
+    modal.show();
+  });
+};
+
+const removeExtension = (filename) => {
+  return filename.replace(/\.[^/.]+$/, "");
+};
+
+const submitAttachments = () => {
+  axios
+    .post(
+      `http://localhost:8081/tax-declarations/${selectedDeclaration.value.ID}/attachments`,
+      files.value
+    )
+    .then((response) => {
+      $toast.success("Attachments added successfully");
+    });
+};
+
 onMounted(() => {
   fetchTaxDeclarations();
   getRevisions();
@@ -301,7 +357,7 @@ onMounted(() => {
       <div class="border my-2 border-primary"></div>
     </template>
 
-    <!-- <div
+    <div
       v-if="isFetching"
       class="d-flex justify-content-center align-items-center bg-dark"
       style="
@@ -320,7 +376,89 @@ onMounted(() => {
         </div>
         <h4 class="text-white mt-2">Fetching Records</h4>
       </div>
-    </div> -->
+    </div>
+
+    <div>
+      <div
+        class="modal fade"
+        id="addAttachments"
+        tabindex="-1"
+        aria-labelledby="addAttachmentsLabel"
+        aria-hidden="true"
+      >
+        <div class="modal-dialog modal-xl">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title text-uppercase" id="addAttachmentsLabel">
+                <div class="fw-bold">Add Attachments</div>
+              </h5>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+              ></button>
+            </div>
+            <div class="modal-body">
+              <div v-if="files && files.length !== 0">
+                <div v-for="file in files" :key="file">
+                  <div class="row mb-3">
+                    <div class="col-lg-6">
+                      <div class="form-group">
+                        <label for="file" class="form-label text-dark fw-bold"
+                          >FILE NAME</label
+                        >
+                        <input
+                          type="text"
+                          class="form-control"
+                          v-model="file.name"
+                          placeholder="Enter File name"
+                        />
+                      </div>
+                    </div>
+
+                    <div class="col-lg-6">
+                      <div class="form-group">
+                        <label
+                          for="file"
+                          class="form-label text-dark text-uppercase fw-bold"
+                          >TAG</label
+                        >
+                        <select class="form-control" v-model="file.tag">
+                          <option value="">Select Tag</option>
+                          <option
+                            :value="tag"
+                            v-for="tag in tags"
+                            :key="tag"
+                            class="text-uppercase"
+                          >
+                            {{ tag.name.toUpperCase() }}
+                          </option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div v-else>
+                <h4 class="text-center text-uppercase fw-bold text-danger">
+                  No Files Found
+                </h4>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                Close
+              </button>
+              <button type="submit" class="btn btn-primary" @click="submitAttachments">
+                <span v-if="isLoading" class="spinner-border spinner-border-sm"></span>
+                <span v-else> Apply </span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <div>
       <div
@@ -528,9 +666,14 @@ onMounted(() => {
     <div class="clearfix"></div>
     <div v-auto-animate>
       <div class="card" v-if="showFilters">
+        <div class="card-header">
+          <h5 class="card-title">Filters</h5>
+          <h6 class="card-subtitle text-muted">
+            You can use filter to narrow down your search
+          </h6>
+        </div>
         <div class="card-body">
           <div class="row">
-            <label class="form-label text-dark fw-bold">LOCATION FILTERS:</label>
             <div class="col-lg-4">
               <label for="">Municipality</label>
               <v-select
@@ -580,7 +723,6 @@ onMounted(() => {
             </div>
           </div>
           <hr />
-          <label class="form-label text-dark fw-bold">DATE FILTER:</label>
           <div class="row">
             <div class="col-lg-6">
               <label class="text-dark">Date To:</label>
@@ -628,13 +770,14 @@ onMounted(() => {
         <table class="table mb-0 table table-striped border">
           <thead>
             <tr>
-              <th class="fw-medium bg-dark text-white">Previous Declaration #</th>
-              <th class="fw-medium bg-dark text-white">Tax Declaration #</th>
+              <th class="fw-medium bg-dark text-white">Previous TDN</th>
+              <th class="fw-medium bg-dark text-white">TDN</th>
               <th class="fw-medium bg-dark text-white">Property Identification</th>
-              <th class="fw-medium bg-dark text-white">Lot #</th>
+              <th class="fw-medium bg-dark text-white">Lot No</th>
               <th class="fw-medium bg-dark text-white">Declared Owner</th>
-              <th class="fw-medium bg-dark text-white">Tax Effectivity</th>
+              <th class="fw-medium bg-dark text-white text-center">Tax Effectivity</th>
               <th class="fw-medium bg-dark text-white">Location</th>
+              <th class="fw-medium bg-dark text-white text-center">Assigned By</th>
               <th class="fw-medium bg-dark text-white text-center">Created At</th>
               <th class="fw-medium bg-dark text-white text-center">Actions</th>
             </tr>
@@ -697,8 +840,18 @@ onMounted(() => {
                   'text-primary': actionTakenFresh(declaration.updatedAt),
                 }"
               >
-                <span class="">
+                <span class="text-uppercase">
                   {{ declaration.municipality?.name }} / {{ declaration.barangay?.name }}
+                </span>
+              </td>
+              <td
+                class="text-center fw-medium"
+                :class="{
+                  'text-primary': actionTakenFresh(declaration.updatedAt),
+                }"
+              >
+                <span class="text-uppercase">
+                  {{ declaration.user?.username }}
                 </span>
               </td>
               <td
@@ -712,7 +865,7 @@ onMounted(() => {
               <td class="text-center">
                 <div class="dropdown">
                   <button
-                    class="btn btn-dark dropdown-toggle"
+                    class="btn btn-dark dropdown-toggle btn-lg"
                     type="button"
                     id="dropdownMenuButton"
                     data-bs-toggle="dropdown"
@@ -723,7 +876,7 @@ onMounted(() => {
                   <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                     <li>
                       <Router-Link
-                        :to="`/tax-declaration/${declaration.lotNo}`"
+                        :to="`/tax-declaration/${declaration.taxDeclarationNo}`"
                         class="dropdown-item"
                       >
                         <svg
@@ -772,7 +925,7 @@ onMounted(() => {
                       </a>
                     </li>
                     <li>
-                      <a class="dropdown-item">
+                      <a class="dropdown-item" @click="addAttachments(declaration)">
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
                           width="16"

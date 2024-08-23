@@ -5,6 +5,8 @@ import DashboardView from '../views/DashboardView.vue'
 import RecordHistoryView from '../views/RecordHistoryView.vue'
 import RevisionView from '@/views/RevisionView.vue'
 import TaxDeclarationHistoryView from '@/views/TaxDeclarationHistoryView.vue'
+import TagView from '@/views/TagView.vue'
+import UserView from '@/views/UserView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -20,7 +22,7 @@ const router = createRouter({
       component: RecordHistoryView
     },
     {
-      path: '/tax-declaration/:lotNo',
+      path: '/tax-declaration/:taxDeclarationNo',
       name: 'tax-declaration',
       component: TaxDeclarationHistoryView
     },
@@ -34,16 +36,26 @@ const router = createRouter({
       name: 'revisions',
       component: RevisionView
     },
+    {
+      path: '/tags',
+      name: 'tags',
+      component: TagView
+    },
+    {
+      path: '/users',
+      name: 'users',
+      component: UserView
+    },
      {
       path: '/login',
       name: 'login',
       component: LoginView
     },
     {
-      path: '/about',
-      name: 'about',
-      component: () => import('../views/AboutView.vue')
-    }
+      path: '/settings',
+      name: 'settings',
+      component: () => import('../views/SettingView.vue')
+    },
   ]
 })
 

@@ -2,15 +2,14 @@
 import { useRoute, useRouter } from "vue-router";
 
 const username = localStorage.getItem("username");
-
+const type = localStorage.getItem("type");
 const router = useRouter();
 
 const logout = () => {
-  // remove the username and isLogin from localStorage
   localStorage.removeItem("username");
   localStorage.removeItem("isLogin");
-
-  // redirect to login page
+  localStorage.removeItem("type");
+  localStorage.removeItem("id");
   router.replace({ path: "/login" });
 };
 </script>
@@ -18,8 +17,13 @@ const logout = () => {
   <div class="wrapper">
     <nav id="sidebar" class="sidebar js-sidebar">
       <div class="sidebar-content js-simplebar">
-        <a class="sidebar-brand" href="">
-          <span class="sidebar-brand-text align-middle"> NAME OF SYSTEM </span>
+        <a
+          class="sidebar-brand border border-2 border-start-0 border-end-0 border-top-0 mb-2"
+          href=""
+        >
+          <span class="sidebar-brand-text align-middle fw-bold h4 mb-0 p-0 text-white">
+            DIGITAL FILING SYSTEM
+          </span>
           <svg
             class="sidebar-brand-icon align-middle"
             width="32px"
@@ -62,7 +66,12 @@ const logout = () => {
               </div>
 
               <div class="sidebar-user-subtitle">
-                <span> Administrator </span>
+                <span v-if="type === 1">
+                  <span class="badge bg-success">Administrator</span>
+                </span>
+                <span v-else>
+                  <span class="badge bg-primary">User</span>
+                </span>
               </div>
             </div>
           </div>
@@ -119,7 +128,10 @@ const logout = () => {
                 <Router-Link class="sidebar-link" to="/revisions">Revisions</Router-Link>
               </li>
               <li class="sidebar-item">
-                <Router-Link class="sidebar-link" to="/revisions">Users</Router-Link>
+                <Router-Link class="sidebar-link" to="/tags">Tags</Router-Link>
+              </li>
+              <li class="sidebar-item">
+                <Router-Link class="sidebar-link" to="/users">Users</Router-Link>
               </li>
             </ul>
           </li>
@@ -158,14 +170,9 @@ const logout = () => {
             </ul>
           </li>
 
-          <li class="sidebar-header">Reports</li>
+          <li class="sidebar-header">Application</li>
           <li class="sidebar-item">
-            <a class="sidebar-link">Generate</a>
-          </li>
-
-          <!-- <li class="sidebar-header">Application</li> -->
-          <!-- <li class="sidebar-item">
-            <RouterLink class="sidebar-link" to="/dashboard">
+            <RouterLink class="sidebar-link" to="/settings">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="16"
@@ -180,7 +187,7 @@ const logout = () => {
               </svg>
               <span class="align-middle">Settings</span>
             </RouterLink>
-          </li> -->
+          </li>
         </ul>
       </div>
     </nav>

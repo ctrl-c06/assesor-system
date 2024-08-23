@@ -141,6 +141,7 @@ const viewFiles = () => {
 };
 
 const submitRecord = () => {
+  assign.value.user_id = parseInt(localStorage.getItem("id"));
   createRecord(assign.value).then((data) => {
     let record = data;
     let date = moment(data.createdAt).format("MMMM DD, YYYY");
@@ -148,13 +149,15 @@ const submitRecord = () => {
       .post("http://localhost:8080/move", {
         fileName: selectedFile.value.name,
         folderName:
+          assign.value.taxRevision.revisionNumber +
+          "/" +
           assign.value.municipality.name +
           "/" +
           assign.value.barangay.name +
           "/" +
-          date +
+          assign.value.declaredOwner +
           "/" +
-          assign.value.declaredOwner,
+          assign.value.lotNo,
       })
       .then((response) => {
         axios
@@ -643,8 +646,7 @@ onMounted(() => {
                             v-for="revision in revisions"
                             :key="revision"
                           >
-                            {{ revision.RevisionNumber }} ({{ revision.fromYear }} -
-                            {{ revision.toYear }})
+                            {{ revision.revisionNumber }}
                           </option>
                         </select>
                       </div>

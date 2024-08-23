@@ -4,6 +4,7 @@ import { onMounted, ref } from "vue";
 import { useToast } from "vue-toast-notification";
 import axios from "axios";
 import alertify from "alertifyjs";
+import moment from "moment";
 
 const revisions = ref([]);
 const revision = ref({
@@ -383,7 +384,7 @@ onMounted(() => {
             </th>
           </tr>
         </thead>
-        <tbody>
+        <tbody class="bg-white">
           <tr v-for="revision in revisions" :key="revision">
             <td class="text-center">{{ revision.revisionNumber }}</td>
             <td class="text-center">
@@ -391,7 +392,9 @@ onMounted(() => {
             </td>
             <td class="text-center text-uppercase">{{ revision.description }}</td>
             <td class="text-center">{{ revision.percentage }}%</td>
-            <td class="text-center">{{ revision.createdAt }}</td>
+            <td class="text-center">
+              {{ moment(revision.createdAt).format("MMMM Do YYYY, hh:mm:ss A") }}
+            </td>
             <td class="text-center">
               <button
                 class="btn btn-success btn-lg me-2"
