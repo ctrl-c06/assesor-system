@@ -29,7 +29,11 @@ const toggleDisplay = (taxDeclaration) => {
     opened.value.splice(opened.value.indexOf(taxDeclaration.taxDeclarationNo), 1);
   } else {
     attachmentBeingProcess.value = true;
-
+    if (taxDeclaration.attachments.length === 0) {
+      attachmentBeingProcess.value = false;
+      opened.value.push(taxDeclaration.taxDeclarationNo);
+      return;
+    }
     axios
       .post("http://localhost:8080/generate-attachment-thumbnails", {
         files: taxDeclaration.attachments

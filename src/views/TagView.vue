@@ -230,25 +230,25 @@ onMounted(() => getAllTags());
         <thead>
           <tr>
             <th
-              class="text-uppercase bg-dark text-white border text-center border border-dark"
+              class="text-uppercase bg-dark text-white border text-center border border-dark fw-medium"
             >
-              <small> Tag ID </small>
+              Tag ID
             </th>
 
             <th
-              class="text-uppercase bg-dark text-white border text-center border border-dark"
+              class="text-uppercase bg-dark text-white border text-center border border-dark fw-medium"
             >
-              <small> Description </small>
+              Description
             </th>
             <th
-              class="text-uppercase bg-dark text-white border text-center border border-dark"
+              class="text-uppercase bg-dark text-white border text-center border border-dark fw-medium"
             >
-              <small> Created At </small>
+              Created At
             </th>
             <th
-              class="text-uppercase bg-dark text-white border text-center border border-dark"
+              class="text-uppercase bg-dark text-white border text-center border border-dark fw-medium"
             >
-              <small> Actions </small>
+              Actions
             </th>
           </tr>
         </thead>

@@ -1,13 +1,17 @@
 <script setup>
 import Layout from "@/components/BaseLayout.vue";
 import axios from "axios";
-import { onMounted, ref, defineComponent } from "vue";
+import { onMounted, ref, defineComponent, reactive, watch } from "vue";
 import ApexChart from "vue3-apexcharts";
+import UsersComponent from "@/components/UsersComponent.vue";
 
 defineComponent({
+  UsersComponent,
   ApexChart,
 });
 
+const municipalities = ref([]);
+const selectedMunicipality = ref("");
 const widgetsData = ref({
   totalTaxDeclarations: 0,
   totalUnassignedFiles: 0,
@@ -16,6 +20,28 @@ const widgetsData = ref({
 });
 
 const isBarangayClicked = ref(false);
+const pieChartRef = ref(null);
+
+const pieChartSeries = ref([]);
+const pieChartOptions = ref({
+  chart: {
+    type: "donut",
+  },
+  responsive: [
+    {
+      breakpoint: 480,
+      options: {
+        chart: {
+          width: 200,
+        },
+        legend: {
+          position: "bottom",
+        },
+      },
+    },
+  ],
+  labels: [],
+});
 
 const onDataPointClick = (event, chartContext, config) => {
   if (isBarangayClicked.value) {
@@ -23,26 +49,45 @@ const onDataPointClick = (event, chartContext, config) => {
   } else {
     isBarangayClicked.value = true;
   }
+  // http://localhost:8081/tax-declarations/barangay-count/1
   const seriesIndex = config.seriesIndex;
   const dataPointIndex = config.dataPointIndex;
-  const data = config.w.config.series[seriesIndex].data[dataPointIndex];
-  console.log(`Data Point: ${dataPointIndex}, Value: ${data}`);
+  // const data = config.w.config.series[seriesIndex].data[dataPointIndex];
+  // Make sure `municipalities.value` has the relevant data
+  const municipalityId = municipalities.value[dataPointIndex].municipality_id;
+  const municipalityName = municipalities.value[dataPointIndex].municipality_name;
+  selectedMunicipality.value = municipalityName;
+
+  axios
+    .get(`http://localhost:8081/tax-declarations/barangay-count/${municipalityId}`)
+    .then((response) => {
+      const categories = response.data.map((data) => data.barangay_name);
+      const dataSeries = response.data.map((data) => data.count);
+
+      // Update the pie chart series and options
+      pieChartSeries.value = dataSeries;
+
+      if (pieChartRef.value) {
+        pieChartRef.value.updateOptions({
+          labels: categories, // Update labels for the pie chart
+        });
+      }
+    });
 };
 
-const series = [
+const chartRef = ref(null);
+
+const series = reactive([
   {
-    data: [400, 430, 448, 470, 540, 580, 690, 1100, 1200, 1380],
+    data: [],
+    name: "Tax Declarations",
   },
-];
-const chartOptions = {
+]);
+
+const chartOptions = reactive({
   chart: {
     type: "bar",
     height: 350,
-    events: {
-      dataPointSelection: (event, chartContext, config) => {
-        console.log("Selected Data:", config);
-      },
-    },
   },
   plotOptions: {
     bar: {
@@ -55,40 +100,54 @@ const chartOptions = {
     enabled: false,
   },
   xaxis: {
-    categories: [
-      "South Korea",
-      "Canada",
-      "United Kingdom",
-      "Netherlands",
-      "Italy",
-      "France",
-      "Japan",
-      "United States",
-      "China",
-      "Germany",
-    ],
+    categories: [],
   },
-};
+});
 
 onMounted(() => {
+  axios.get(`http://localhost:8080/files`).then((response) => {
+    widgetsData.value.totalUnassignedFiles = response.data.length;
+  });
+
   axios.get(`http://localhost:8081/dashboard-data`).then((response) => {
     widgetsData.value.totalTaxDeclarations = response.data.totalTaxDeclarations;
     widgetsData.value.totalAttachments = response.data.totalAttachments;
     widgetsData.value.totalUsers = response.data.totalUsers;
   });
+
+  axios
+    .get(`http://localhost:8081/tax-declarations/municipality-count`)
+    .then((response) => {
+      if (response.data) {
+        municipalities.value = response.data;
+        const categories = response.data.map((data) => data.municipality_name);
+        const dataSeries = response.data.map((data) => data.count);
+        if (chartRef.value) {
+          series[0].data = dataSeries;
+          chartRef.value.updateOptions({
+            xaxis: {
+              categories: categories,
+            },
+          });
+        }
+      }
+    });
 });
 </script>
 
 <template>
   <layout>
-    <div class="container-fluid p-0">
-      <div class="row mb-2 mb-xl-3">
+    <template #title>
+      <h4 class="text-uppercase fw-bold">
         <div class="col-auto d-none d-sm-block">
           <h3>
             <strong> Dashboard </strong>
           </h3>
         </div>
-      </div>
+      </h4>
+      <div class="border my-2 border-primary"></div>
+    </template>
+    <div class="container-fluid p-0">
       <div class="row">
         <div class="col-3">
           <div class="card">
@@ -230,7 +289,7 @@ onMounted(() => {
         >
           <div class="card">
             <div class="card-header pb-0 mb-0">
-              <h5 class="card-title text-primary">
+              <h5 class="card-title text-dark">
                 Assigned Files by Municipality & Barangay
               </h5>
               <h6 class="card-subtitle text-muted">
@@ -242,6 +301,7 @@ onMounted(() => {
               <apex-chart
                 type="bar"
                 height="350"
+                ref="chartRef"
                 :options="chartOptions"
                 :series="series"
                 @dataPointSelection="onDataPointClick"
@@ -253,10 +313,33 @@ onMounted(() => {
         <div class="col-lg-4" v-auto-animate v-if="isBarangayClicked">
           <div class="card">
             <div class="card-header">
-              <h5 class="card-title text-primary">Lorem Ipsum</h5>
+              <h5 class="card-title text-dark">
+                {{ selectedMunicipality }}
+                Tax Declarations per Barangay
+              </h5>
               <h6 class="card-subtitle text-muted"></h6>
             </div>
-            <div class="card-body"></div>
+            <div class="card-body">
+              <!-- make apex chart pie chart -->
+              <apex-chart
+                type="pie"
+                height="350"
+                ref="pieChartRef"
+                :options="pieChartOptions"
+                :series="pieChartSeries"
+              ></apex-chart>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <h1 class="fs-4 fw-bold px-3">List of Users</h1>
+        <div class="px-3">
+          <div class="card">
+            <div class="card-body">
+              <UsersComponent />
+            </div>
           </div>
         </div>
       </div>

@@ -331,12 +331,17 @@ const removeExtension = (filename) => {
 };
 
 const submitAttachments = () => {
+  const filesWithTags = files.value.filter((file) => file.tag !== "");
   axios
     .post(
       `http://localhost:8081/tax-declarations/${selectedDeclaration.value.ID}/attachments`,
-      files.value
+      filesWithTags
     )
     .then((response) => {
+      const modal = bootstrap.Modal.getInstance(
+        document.getElementById("addAttachments")
+      );
+      modal.hide();
       $toast.success("Attachments added successfully");
     });
 };

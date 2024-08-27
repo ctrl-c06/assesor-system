@@ -353,34 +353,34 @@ onMounted(() => {
         <thead>
           <tr>
             <th
-              class="text-uppercase bg-dark text-white border text-center border border-dark"
+              class="text-uppercase bg-dark text-white border text-center border border-dark fw-medium"
             >
-              <small> Revision Number </small>
+              Revision Number
             </th>
             <th
-              class="text-uppercase bg-dark text-white border text-center border border-dark"
+              class="text-uppercase bg-dark text-white border text-center border border-dark fw-medium"
             >
-              <small> From / To Year </small>
+              From / To Year
             </th>
             <th
-              class="text-uppercase bg-dark text-white border text-center border border-dark"
+              class="text-uppercase bg-dark text-white border text-center border border-dark fw-medium"
             >
-              <small> Description </small>
+              Description
             </th>
             <th
-              class="text-uppercase bg-dark text-white border text-center border border-dark"
+              class="text-uppercase bg-dark text-white border text-center border border-dark fw-medium"
             >
-              <small> Percentage </small>
+              Percentage
             </th>
             <th
-              class="text-uppercase bg-dark text-white border text-center border border-dark"
+              class="text-uppercase bg-dark text-white border text-center border border-dark fw-medium"
             >
-              <small> Created At </small>
+              Created At
             </th>
             <th
-              class="text-uppercase bg-dark text-white border text-center border border-dark"
+              class="text-uppercase bg-dark text-white border text-center border border-dark fw-medium"
             >
-              <small> Actions </small>
+              Actions
             </th>
           </tr>
         </thead>

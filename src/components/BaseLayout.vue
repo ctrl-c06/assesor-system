@@ -1,9 +1,13 @@
 <script setup>
 import { useRoute, useRouter } from "vue-router";
+import { ref, onMounted } from "vue";
+import axios from "axios";
 
 const username = localStorage.getItem("username");
 const type = localStorage.getItem("type");
 const router = useRouter();
+
+const unAssignedFilesCount = ref(0);
 
 const logout = () => {
   localStorage.removeItem("username");
@@ -12,6 +16,17 @@ const logout = () => {
   localStorage.removeItem("id");
   router.replace({ path: "/login" });
 };
+
+onMounted(() => {
+  axios
+    .get("http://localhost:8080/files")
+    .then((response) => {
+      unAssignedFilesCount.value = response.data.length;
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+});
 </script>
 <template>
   <div class="wrapper">
@@ -160,7 +175,10 @@ const logout = () => {
               data-bs-parent="#sidebar"
             >
               <li class="sidebar-item">
-                <Router-Link class="sidebar-link" to="/">File Scans</Router-Link>
+                <Router-Link class="sidebar-link" to="/"
+                  >File Scans
+                  <span class="badge bg-danger">{{ unAssignedFilesCount }}</span>
+                </Router-Link>
               </li>
               <li class="sidebar-item">
                 <Router-Link class="sidebar-link" to="/history"
