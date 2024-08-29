@@ -142,6 +142,13 @@ const viewFiles = () => {
 
 const submitRecord = () => {
   assign.value.user_id = parseInt(localStorage.getItem("id"));
+  assign.value.taxRevision = assign.value.taxRevision || {};
+  assign.value.barangay = assign.value.barangay || {};
+  assign.value.municipality = assign.value.municipality || {};
+
+  assign.value.barangay_id = assign.value.barangay.id;
+  assign.value.municipality_id = assign.value.municipality.id;
+
   createRecord(assign.value).then((data) => {
     let record = data;
     let date = moment(data.createdAt).format("MMMM DD, YYYY");
@@ -700,12 +707,7 @@ onMounted(() => {
               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                 Close
               </button>
-              <button
-                type="submit"
-                class="btn btn-primary"
-                @click="submitRecord"
-                data-bs-dismiss="modal"
-              >
+              <button type="submit" class="btn btn-primary" @click="submitRecord">
                 <span v-if="isLoading" class="spinner-border spinner-border-sm"></span>
                 <span v-else> Save changes </span>
               </button>

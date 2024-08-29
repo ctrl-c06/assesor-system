@@ -49,11 +49,9 @@ const onDataPointClick = (event, chartContext, config) => {
   } else {
     isBarangayClicked.value = true;
   }
-  // http://localhost:8081/tax-declarations/barangay-count/1
-  const seriesIndex = config.seriesIndex;
+
   const dataPointIndex = config.dataPointIndex;
-  // const data = config.w.config.series[seriesIndex].data[dataPointIndex];
-  // Make sure `municipalities.value` has the relevant data
+
   const municipalityId = municipalities.value[dataPointIndex].municipality_id;
   const municipalityName = municipalities.value[dataPointIndex].municipality_name;
   selectedMunicipality.value = municipalityName;

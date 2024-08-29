@@ -8,6 +8,7 @@ import moment from "moment";
 
 const $toast = useToast();
 const users = ref([]);
+const errors = ref({});
 const user = ref({
   employee_id: "",
   username: "",
@@ -33,11 +34,18 @@ const clearForm = () => {
 };
 
 const createUser = () => {
-  axios.post(`http://localhost:8081/users`, user.value).then((response) => {
-    $toast.success("User created successfully");
-    clearForm();
-    getUsers();
-  });
+  axios
+    .post(`http://localhost:8081/users`, user.value)
+    .then((response) => {
+      $toast.success("User created successfully");
+      clearForm();
+      getUsers();
+    })
+    .catch((err) => {
+      if (err.response.status === 422) {
+        errors.value = err.response.data;
+      }
+    });
 };
 
 const getUsers = () => {
@@ -56,13 +64,19 @@ const editUser = (user) => {
 };
 
 const updateUser = () => {
+  selectedUser.value.access_level = parseInt(selectedUser.value.access_level);
+  selectedUser.value.EmployeeID = selectedUser.value.employee_id;
   axios
     .put(`http://localhost:8081/users/${selectedUser.value.id}`, selectedUser.value)
     .then((response) => {
+      errors.value = {};
       $toast.success("User updated successfully");
       getUsers();
     })
     .catch((error) => {
+      if (error.response?.status === 422) {
+        errors.value = error.response.data;
+      }
       $toast.error("Failed to update user");
     });
 };
@@ -122,10 +136,16 @@ onMounted(() => getUsers());
               <input
                 type="text"
                 class="form-control"
-                id="employee_id"
                 v-model="user.employee_id"
                 placeholder="e.g. 4994"
+                :class="{ 'is-invalid': errors.hasOwnProperty('EmployeeID') }"
               />
+
+              <div class="text-danger" v-auto-animate>
+                <span v-if="errors.hasOwnProperty('EmployeeID')">
+                  Employee ID {{ errors.EmployeeID }}
+                </span>
+              </div>
             </div>
             <div class="mb-3">
               <label for="username" class="form-label text-uppercase fw-bold h5"
@@ -134,10 +154,16 @@ onMounted(() => getUsers());
               <input
                 type="text"
                 class="form-control"
-                id="username"
                 v-model="user.username"
                 placeholder="e.g. user1"
+                :class="{ 'is-invalid': errors.hasOwnProperty('Username') }"
               />
+
+              <div class="text-danger" v-auto-animate>
+                <span v-if="errors.hasOwnProperty('Username')">
+                  Username {{ errors.Username }}
+                </span>
+              </div>
             </div>
             <div class="mb-3">
               <label for="password" class="form-label text-uppercase fw-bold h5"
@@ -146,16 +172,22 @@ onMounted(() => getUsers());
               <input
                 type="password"
                 class="form-control"
-                id="password"
                 v-model="user.password"
                 placeholder="********"
+                :class="{ 'is-invalid': errors.hasOwnProperty('Password') }"
               />
+
+              <div class="text-danger" v-auto-animate>
+                <span v-if="errors.hasOwnProperty('Password')">
+                  Password {{ errors.Password }}
+                </span>
+              </div>
             </div>
             <div class="mb-3">
               <label for="access_level" class="form-label text-uppercase fw-bold h5"
                 >Access Level</label
               >
-              <select class="form-select" id="access_level" v-model="user.access_level">
+              <select class="form-select" v-model="user.access_level">
                 <option value="2">User</option>
                 <option value="1">Administrator</option>
               </select>
@@ -204,10 +236,16 @@ onMounted(() => getUsers());
               <input
                 type="text"
                 class="form-control"
-                id="employee_id"
                 v-model="selectedUser.employee_id"
                 placeholder="e.g. 4994"
+                :class="{ 'is-invalid': errors.hasOwnProperty('EmployeeID') }"
               />
+
+              <div class="text-danger" v-auto-animate>
+                <span v-if="errors.hasOwnProperty('EmployeeID')">
+                  Employee ID {{ errors.EmployeeID }}
+                </span>
+              </div>
             </div>
             <div class="mb-3">
               <label for="username" class="form-label text-uppercase fw-bold h5"
@@ -216,10 +254,16 @@ onMounted(() => getUsers());
               <input
                 type="text"
                 class="form-control"
-                id="username"
                 v-model="selectedUser.username"
                 placeholder="e.g. user1"
+                :class="{ 'is-invalid': errors.hasOwnProperty('Username') }"
               />
+
+              <div class="text-danger" v-auto-animate>
+                <span v-if="errors.hasOwnProperty('Username')">
+                  Username {{ errors.Username }}
+                </span>
+              </div>
             </div>
             <div class="mb-3">
               <label for="password" class="form-label text-uppercase fw-bold h5"
@@ -229,20 +273,21 @@ onMounted(() => getUsers());
               <input
                 type="password"
                 class="form-control"
-                id="password"
                 v-model="user.password"
                 placeholder="********"
+                :class="{ 'is-invalid': errors.hasOwnProperty('Password') }"
               />
+              <div class="text-danger" v-auto-animate>
+                <span v-if="errors.hasOwnProperty('Password')">
+                  Password {{ errors.Password }}
+                </span>
+              </div>
             </div>
             <div class="mb-3">
               <label for="access_level" class="form-label text-uppercase fw-bold h5"
                 >Access Level</label
               >
-              <select
-                class="form-select"
-                id="access_level"
-                v-model="selectedUser.access_level"
-              >
+              <select class="form-select" v-model="selectedUser.access_level">
                 <option value="2">User</option>
                 <option value="1">Administrator</option>
               </select>
@@ -265,6 +310,10 @@ onMounted(() => getUsers());
     class="btn btn-primary mb-2 float-end btn-lg btn-primary d-flex align-items-center justify-content-center"
     data-bs-toggle="modal"
     data-bs-target="#addUserModal"
+    @click="
+      errors = {};
+      clearForm();
+    "
   >
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -322,7 +371,7 @@ onMounted(() => getUsers());
         </td>
         <td class="text-center">
           <button
-            class="btn btn-success btn-lg me-2"
+            class="btn btn-success me-2"
             @click="editUser(user)"
             data-bs-toggle="modal"
             data-bs-target="#editUserModal"
@@ -343,7 +392,7 @@ onMounted(() => getUsers());
           </button>
 
           <!-- delete button -->
-          <button class="btn btn-danger btn-lg" @click="deleteUser(user)">
+          <button class="btn btn-danger" @click="deleteUser(user)">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="16"

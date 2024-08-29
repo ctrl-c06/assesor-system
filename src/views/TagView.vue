@@ -9,7 +9,7 @@ import moment from "moment";
 const tags = ref([]);
 
 const toast = useToast();
-
+const errors = ref({});
 const tag = ref({
   name: "",
 });
@@ -36,7 +36,11 @@ const submitNewTag = () => {
       });
     })
     .catch((error) => {
-      console.log(error);
+      if (error.response.status === 422) {
+        errors.value = error.response.data;
+        return;
+      }
+
       toast.open({
         message: "Failed to add tag",
         type: "error",
@@ -45,6 +49,7 @@ const submitNewTag = () => {
 };
 
 const editTag = (t) => {
+  errors.value = {};
   tag.value = t;
 };
 
@@ -60,7 +65,11 @@ const updateTag = () => {
       });
     })
     .catch((error) => {
-      console.log(error);
+      if (error.response.status == 422) {
+        errors.value = error.response.data;
+        return;
+      }
+
       toast.open({
         message: "Failed to update tag",
         type: "error",
@@ -135,8 +144,14 @@ onMounted(() => getAllTags());
                   class="form-control text-uppercase"
                   v-model="tag.name"
                   @keypress.enter.prevent="submitNewTag"
-                  placeholder="Enter tag description"
+                  :class="{ 'is-invalid': errors.hasOwnProperty('Name') }"
                 />
+
+                <div class="text-danger" v-auto-animate>
+                  <span v-if="errors.hasOwnProperty('Name')">
+                    Description {{ errors.Name }}
+                  </span>
+                </div>
               </div>
             </form>
           </div>
@@ -183,8 +198,14 @@ onMounted(() => getAllTags());
                   class="form-control text-uppercase"
                   v-model="tag.name"
                   @keypress.enter.prevent="updateTag"
-                  placeholder="Enter tag description"
+                  :class="{ 'is-invalid': errors.hasOwnProperty('Name') }"
                 />
+
+                <div class="text-danger" v-auto-animate>
+                  <span v-if="errors.hasOwnProperty('Name')">
+                    Description {{ errors.Name }}
+                  </span>
+                </div>
               </div>
             </form>
           </div>
@@ -210,6 +231,7 @@ onMounted(() => getAllTags());
         class="btn btn-primary mb-2 float-end btn-lg btn-primary"
         data-bs-toggle="modal"
         data-bs-target="#addTagModal"
+        @click="errors = {}"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -265,7 +287,7 @@ onMounted(() => getAllTags());
             </td>
             <td class="text-center">
               <button
-                class="btn btn-success btn-lg me-2"
+                class="btn btn-success me-2"
                 @click="editTag(tag)"
                 data-bs-target="#editTagModal"
                 data-bs-toggle="modal"
@@ -285,7 +307,7 @@ onMounted(() => getAllTags());
                 Edit
               </button>
 
-              <button class="btn btn-danger btn-lg" @click="deleteTag(tag.ID)">
+              <button class="btn btn-danger" @click="deleteTag(tag.ID)">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="16"

@@ -15,6 +15,7 @@ const revision = ref({
   percentage: "",
 });
 
+const isLoading = ref(false);
 const $toast = useToast();
 const selectedRevision = ref({
   revisionNumber: "",
@@ -23,6 +24,7 @@ const selectedRevision = ref({
   description: "",
   percentage: "",
 });
+const errors = ref({});
 
 const getRevisions = () => {
   axios
@@ -36,6 +38,7 @@ const getRevisions = () => {
 };
 
 const submitRevision = () => {
+  isLoading.value = true;
   revision.value.fromYear = parseInt(revision.value.fromYear);
   revision.value.toYear = parseInt(revision.value.toYear);
   revision.value.percentage = parseFloat(revision.value.percentage);
@@ -43,13 +46,20 @@ const submitRevision = () => {
     .post("http://localhost:8081/tax-revisions", revision.value)
     .then((response) => {
       getRevisions();
+      isLoading.value = false;
+      errors.value = {};
       $toast.open({
         message: "Tax revision added successfully",
         type: "success",
       });
     })
     .catch((error) => {
-      console.error(error);
+      isLoading.value = false;
+      if (error.response.status === 422) {
+        errors.value = error.response.data;
+        revision.value.toYear = "";
+        revision.value.fromYear = "";
+      }
     });
 };
 
@@ -58,9 +68,10 @@ const editRevision = (revision) => {
 };
 
 const updateRevision = () => {
-  selectedRevision.value.fromYear = parseInt(selectedRevision.value.fromYear);
-  selectedRevision.value.toYear = parseInt(selectedRevision.value.toYear);
-  selectedRevision.value.percentage = parseFloat(selectedRevision.value.percentage);
+  selectedRevision.value.fromYear = parseInt(selectedRevision.value.fromYear) || 0;
+  selectedRevision.value.toYear = parseInt(selectedRevision.value.toYear) || 0;
+  selectedRevision.value.percentage = parseFloat(selectedRevision.value.percentage) || 0;
+
   axios
     .put(
       `http://localhost:8081/tax-revisions/${selectedRevision.value.ID}`,
@@ -69,6 +80,7 @@ const updateRevision = () => {
     .then((response) => {
       if (response.status === 200) {
         getRevisions();
+        errors.value = {};
 
         $toast.open({
           message: "Tax revision updated successfully",
@@ -77,7 +89,9 @@ const updateRevision = () => {
       }
     })
     .catch((error) => {
-      console.error(error);
+      if (error.response.status === 422) {
+        errors.value = error.response.data;
+      }
     });
 };
 
@@ -157,7 +171,15 @@ onMounted(() => {
                   id="revisionNumber"
                   placeholder="Enter revision number"
                   v-model="revision.revisionNumber"
+                  :class="{
+                    'is-invalid': errors.hasOwnProperty('RevisionNumber'),
+                  }"
                 />
+                <div v-auto-animate>
+                  <div class="text-danger" v-if="errors.hasOwnProperty('RevisionNumber')">
+                    Revision Number {{ errors.RevisionNumber }}
+                  </div>
+                </div>
               </div>
               <div class="mb-3">
                 <label for="fromYear" class="form-label text-uppercase fw-bold text-dark"
@@ -169,7 +191,15 @@ onMounted(() => {
                   id="fromYear"
                   placeholder="Enter from year"
                   v-model="revision.fromYear"
+                  :class="{
+                    'is-invalid': errors.hasOwnProperty('FromYear'),
+                  }"
                 />
+                <div v-auto-animate>
+                  <div class="text-danger" v-if="errors.hasOwnProperty('FromYear')">
+                    FROM (YEAR) {{ errors.FromYear }}
+                  </div>
+                </div>
               </div>
               <div class="mb-3">
                 <label for="toYear" class="form-label text-uppercase fw-bold text-dark"
@@ -181,7 +211,15 @@ onMounted(() => {
                   id="toYear"
                   placeholder="Enter to year"
                   v-model="revision.toYear"
+                  :class="{
+                    'is-invalid': errors.hasOwnProperty('ToYear'),
+                  }"
                 />
+                <div v-auto-animate>
+                  <div class="text-danger" v-if="errors.hasOwnProperty('ToYear')">
+                    TO (YEAR) {{ errors.ToYear }}
+                  </div>
+                </div>
               </div>
               <div class="mb-3">
                 <label
@@ -195,7 +233,16 @@ onMounted(() => {
                   rows="3"
                   placeholder="Enter description"
                   v-model="revision.description"
+                  :class="{
+                    'is-invalid': errors.hasOwnProperty('Description'),
+                  }"
                 ></textarea>
+
+                <div v-auto-animate>
+                  <div class="text-danger" v-if="errors.hasOwnProperty('Description')">
+                    Description {{ errors.Description }}
+                  </div>
+                </div>
               </div>
               <div class="mb-3">
                 <label
@@ -204,12 +251,20 @@ onMounted(() => {
                   >Percentage</label
                 >
                 <input
-                  type="text"
+                  type="number"
                   class="form-control form-control-lg"
                   id="percentage"
                   placeholder="Enter percentage"
                   v-model="revision.percentage"
+                  :class="{
+                    'is-invalid': errors.hasOwnProperty('Percentage'),
+                  }"
                 />
+                <div v-auto-animate>
+                  <div class="text-danger" v-if="errors.hasOwnProperty('Percentage')">
+                    Percentage {{ errors.Percentage }}
+                  </div>
+                </div>
               </div>
             </form>
           </div>
@@ -217,7 +272,12 @@ onMounted(() => {
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
               Close
             </button>
-            <button type="button" class="btn btn-primary" @click="submitRevision">
+            <button
+              type="button"
+              class="btn btn-primary"
+              @click="submitRevision"
+              :disabled="isLoading"
+            >
               Save changes
             </button>
           </div>
@@ -259,7 +319,15 @@ onMounted(() => {
                   id="revisionNumber"
                   placeholder="Enter revision number"
                   v-model="selectedRevision.revisionNumber"
+                  :class="{
+                    'is-invalid': errors.hasOwnProperty('RevisionNumber'),
+                  }"
                 />
+                <div v-auto-animate>
+                  <div class="text-danger" v-if="errors.hasOwnProperty('RevisionNumber')">
+                    Revision Number {{ errors.RevisionNumber }}
+                  </div>
+                </div>
               </div>
               <div class="mb-3">
                 <label for="fromYear" class="form-label text-uppercase fw-bold text-dark"
@@ -271,7 +339,15 @@ onMounted(() => {
                   id="fromYear"
                   placeholder="Enter from year"
                   v-model="selectedRevision.fromYear"
+                  :class="{
+                    'is-invalid': errors.hasOwnProperty('FromYear'),
+                  }"
                 />
+                <div v-auto-animate>
+                  <div class="text-danger" v-if="errors.hasOwnProperty('FromYear')">
+                    FROM (YEAR) {{ errors.FromYear }}
+                  </div>
+                </div>
               </div>
               <div class="mb-3">
                 <label for="toYear" class="form-label text-uppercase fw-bold text-dark"
@@ -283,7 +359,15 @@ onMounted(() => {
                   id="toYear"
                   placeholder="Enter to year"
                   v-model="selectedRevision.toYear"
+                  :class="{
+                    'is-invalid': errors.hasOwnProperty('ToYear'),
+                  }"
                 />
+                <div v-auto-animate>
+                  <div class="text-danger" v-if="errors.hasOwnProperty('ToYear')">
+                    TO (YEAR) {{ errors.ToYear }}
+                  </div>
+                </div>
               </div>
               <div class="mb-3">
                 <label
@@ -297,7 +381,15 @@ onMounted(() => {
                   rows="3"
                   placeholder="Enter description"
                   v-model="selectedRevision.description"
+                  :class="{
+                    'is-invalid': errors.hasOwnProperty('Description'),
+                  }"
                 ></textarea>
+                <div v-auto-animate>
+                  <div class="text-danger" v-if="errors.hasOwnProperty('Description')">
+                    Revision Number {{ errors.Description }}
+                  </div>
+                </div>
               </div>
               <div class="mb-3">
                 <label
@@ -311,7 +403,15 @@ onMounted(() => {
                   id="percentage"
                   placeholder="Enter percentage"
                   v-model="selectedRevision.percentage"
+                  :class="{
+                    'is-invalid': errors.hasOwnProperty('Percentage'),
+                  }"
                 />
+                <div v-auto-animate>
+                  <div class="text-danger" v-if="errors.hasOwnProperty('Percentage')">
+                    Revision Number {{ errors.Percentage }}
+                  </div>
+                </div>
               </div>
             </form>
           </div>
@@ -397,7 +497,7 @@ onMounted(() => {
             </td>
             <td class="text-center">
               <button
-                class="btn btn-success btn-lg me-2"
+                class="btn btn-success me-2"
                 @click="editRevision(revision)"
                 data-bs-toggle="modal"
                 data-bs-target="#editRevisionModal"
@@ -417,7 +517,7 @@ onMounted(() => {
                 Edit
               </button>
               <!-- delete button -->
-              <button class="btn btn-danger btn-lg" @click="deleteRevision(revision.ID)">
+              <button class="btn btn-danger" @click="deleteRevision(revision.ID)">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="16"
