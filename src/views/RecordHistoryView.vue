@@ -12,7 +12,7 @@ import { getDirectoryFiles } from "@/services/file";
 
 const socket = inject("socket");
 const $toast = useToast();
-
+const errors = ref(null);
 const files = ref([]);
 const tags = ref([]);
 const owners = ref([]);
@@ -211,12 +211,15 @@ const editRecord = (data) => {
     ID: data.ID,
     taxDeclarationNo: data.taxDeclarationNo,
     previousTaxDeclarationNo: data.previousTaxDeclarationNo,
-    declaredOwner: data.declaredOwner,
+    declaredOwner: data.declaredOwner || "",
     lotNo: data.lotNo,
     propertyIdentificationNo: data.propertyIdentificationNo,
     taxRevision: data.taxRevision,
-    barangay: data.barangay,
-    municipality: data.municipality,
+    barangay: data.barangay || "",
+    municipality: data.municipality || "",
+    barangay_id: data.barangay_id || "",
+    municipality_id: data.municipality_id || "",
+    tax_revision_id: data.tax_revision_id || "",
   };
 };
 
@@ -258,11 +261,26 @@ const submitRecord = () => {
 };
 
 const submitEdit = () => {
+  assign.value.declaredOwner = assign.value.declaredOwner || "";
+  assign.value.taxRevision = assign.value.taxRevision || {};
+  assign.value.barangay = assign.value.barangay || {};
+  assign.value.municipality = assign.value.municipality || {};
+
+  assign.value.barangay_id = assign.value.barangay.id || 0;
+  assign.value.municipality_id = assign.value.municipality.id || 0;
+  assign.value.tax_revision_id = assign.value.taxRevision.ID || 0;
+
   axios
     .post(`http://localhost:8081/tax-declarations/${assign.value.ID}`, assign.value)
     .then((data) => {
       $toast.success("Record updated successfully");
       fetchTaxDeclarations(currentPage.value, pageSize.value);
+    })
+    .catch((error) => {
+      if (error.response.status === 422) {
+        errors.value = error.response.data;
+        console.error(error);
+      }
     });
 };
 
@@ -362,7 +380,7 @@ onMounted(() => {
       <div class="border my-2 border-primary"></div>
     </template>
 
-    <div
+    <!-- <div
       v-if="isFetching"
       class="d-flex justify-content-center align-items-center bg-dark"
       style="
@@ -376,12 +394,12 @@ onMounted(() => {
       "
     >
       <div class="d-flex flex-column align-items-center justify-content-center">
-        <div class="spinner-border text-white" role="status">
+        <div class="spinner-border text-white" role="status"> 
           <span class="visually-hidden">Loading...</span>
         </div>
         <h4 class="text-white mt-2">Fetching Records</h4>
       </div>
-    </div>
+    </div> -->
 
     <div>
       <div
@@ -505,8 +523,18 @@ onMounted(() => {
                       v-model="assign.previousTaxDeclarationNo"
                       style="color: black"
                       class="bg-white text-uppercase"
+                      :class="{
+                        'border border-danger rounded': errors?.hasOwnProperty(
+                          'previousTaxDeclarationNo'
+                        ),
+                      }"
                     >
                     </v-select>
+                    <div class="text-danger" v-auto-animate>
+                      <span v-if="errors?.hasOwnProperty('previousTaxDeclarationNo')">
+                        {{ errors.previousTaxDeclarationNo }}
+                      </span>
+                    </div>
                   </div>
 
                   <div class="form-group mt-3">
@@ -520,7 +548,15 @@ onMounted(() => {
                       id="taxDeclarationNo"
                       class="form-control"
                       v-model="assign.taxDeclarationNo"
+                      :class="{
+                        'is-invalid': errors?.hasOwnProperty('taxDeclarationNo'),
+                      }"
                     />
+                    <div class="text-danger" v-auto-animate>
+                      <span v-if="errors?.hasOwnProperty('taxDeclarationNo')">
+                        {{ errors.taxDeclarationNo }}
+                      </span>
+                    </div>
                   </div>
 
                   <div class="form-group w-100 mt-3">
@@ -539,11 +575,21 @@ onMounted(() => {
                       v-model="assign.declaredOwner"
                       style="color: black"
                       class="bg-white text-uppercase"
+                      :class="{
+                        'border border-danger rounded': errors?.hasOwnProperty(
+                          'declaredOwner'
+                        ),
+                      }"
                     >
                       <template #option="{ name }">
                         <h5 class="text-dark">{{ name }}</h5>
                       </template>
                     </v-select>
+                    <div class="text-danger" v-auto-animate>
+                      <span v-if="errors?.hasOwnProperty('declaredOwner')">
+                        {{ errors.declaredOwner }}
+                      </span>
+                    </div>
                   </div>
 
                   <div class="form-group mt-3">
@@ -557,7 +603,15 @@ onMounted(() => {
                       id="areaInHectares"
                       class="form-control"
                       v-model="assign.lotNo"
+                      :class="{
+                        'is-invalid': errors?.hasOwnProperty('lotNo'),
+                      }"
                     />
+                    <div class="text-danger" v-auto-animate>
+                      <span v-if="errors?.hasOwnProperty('lotNo')">
+                        {{ errors.lotNo }}
+                      </span>
+                    </div>
                   </div>
 
                   <div class="form-group mt-3">
@@ -571,7 +625,15 @@ onMounted(() => {
                       id="propertyIdentificationNo"
                       class="form-control"
                       v-model="assign.propertyIdentificationNo"
+                      :class="{
+                        'is-invalid': errors?.hasOwnProperty('propertyIdentificationNo'),
+                      }"
                     />
+                    <div class="text-danger" v-auto-animate>
+                      <span v-if="errors?.hasOwnProperty('propertyIdentificationNo')">
+                        {{ errors.propertyIdentificationNo }}
+                      </span>
+                    </div>
                   </div>
 
                   <div class="form-group mt-3">
@@ -585,16 +647,26 @@ onMounted(() => {
                       id=""
                       class="form-control"
                       v-model="assign.taxRevision"
+                      :class="{
+                        'border border-danger rounded': errors?.hasOwnProperty(
+                          'tax_revision_id'
+                        ),
+                      }"
                     >
                       <option
                         :value="revision"
                         v-for="revision in revisions"
                         :key="revision"
                       >
-                        {{ revision.RevisionNumber }} ({{ revision.fromYear }} -
-                        {{ revision.toYear }})
+                        ({{ revision.revisionNumber }}) / {{ revision.fromYear }} -
+                        {{ revision.toYear }} / {{ revision.percentage }}%
                       </option>
                     </select>
+                    <div class="text-danger" v-auto-animate>
+                      <span v-if="errors?.hasOwnProperty('tax_revision_id')">
+                        {{ errors.tax_revision_id }}
+                      </span>
+                    </div>
                   </div>
 
                   <div class="form-group mt-3">
@@ -610,11 +682,21 @@ onMounted(() => {
                       @search="onMunicipalitySearch"
                       v-model="assign.municipality"
                       style="color: black"
+                      :class="{
+                        'border border-danger rounded': errors?.hasOwnProperty(
+                          'municipality_id'
+                        ),
+                      }"
                     >
                       <template #option="{ name }">
                         <h5 class="text-dark">{{ name }}</h5>
                       </template>
                     </v-select>
+                    <div class="text-danger" v-auto-animate>
+                      <span v-if="errors?.hasOwnProperty('municipality_id')">
+                        {{ errors.municipality_id }}
+                      </span>
+                    </div>
                   </div>
                   <div class="form-group mt-3">
                     <label
@@ -629,11 +711,21 @@ onMounted(() => {
                       @search="onBarangaySearch"
                       v-model="assign.barangay"
                       style="color: black"
+                      :class="{
+                        'border border-danger rounded': errors?.hasOwnProperty(
+                          'barangay_id'
+                        ),
+                      }"
                     >
                       <template #option="{ name }">
                         <h5 class="text-dark">{{ name }}</h5>
                       </template>
                     </v-select>
+                    <div class="text-danger" v-auto-animate>
+                      <span v-if="errors?.hasOwnProperty('barangay_id')">
+                        {{ errors.barangay_id }}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </form>
@@ -642,12 +734,7 @@ onMounted(() => {
               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                 Close
               </button>
-              <button
-                type="submit"
-                class="btn btn-primary"
-                @click="submitEdit"
-                data-bs-dismiss="modal"
-              >
+              <button type="submit" class="btn btn-primary" @click="submitEdit">
                 <span v-if="isLoading" class="spinner-border spinner-border-sm"></span>
                 <span v-else> Save changes </span>
               </button>
@@ -772,19 +859,29 @@ onMounted(() => {
         </div>
       </div>
       <div class="">
-        <table class="table mb-0 table table-striped border">
+        <table class="table mb-0 table table-striped border shadow">
           <thead>
             <tr>
-              <th class="fw-medium bg-dark text-white">Previous TDN</th>
-              <th class="fw-medium bg-dark text-white">TDN</th>
-              <th class="fw-medium bg-dark text-white">Property Identification</th>
-              <th class="fw-medium bg-dark text-white">Lot No</th>
-              <th class="fw-medium bg-dark text-white">Declared Owner</th>
-              <th class="fw-medium bg-dark text-white text-center">Tax Effectivity</th>
-              <th class="fw-medium bg-dark text-white">Location</th>
-              <th class="fw-medium bg-dark text-white text-center">Assigned By</th>
-              <th class="fw-medium bg-dark text-white text-center">Created At</th>
-              <th class="fw-medium bg-dark text-white text-center">Actions</th>
+              <th class="fw-medium bg-dark text-white text-uppercase">Previous TDN</th>
+              <th class="fw-medium bg-dark text-white text-uppercase">TDN</th>
+              <th class="fw-medium bg-dark text-white text-uppercase">
+                Property Identification
+              </th>
+              <th class="fw-medium bg-dark text-white text-uppercase">Lot No</th>
+              <th class="fw-medium bg-dark text-white text-uppercase">Declared Owner</th>
+              <th class="fw-medium bg-dark text-white text-uppercase text-center">
+                Tax Effectivity
+              </th>
+              <th class="fw-medium bg-dark text-white text-uppercase">Location</th>
+              <th class="fw-medium bg-dark text-white text-uppercase text-center">
+                Assigned By
+              </th>
+              <th class="fw-medium bg-dark text-white text-uppercase text-center">
+                Created At
+              </th>
+              <th class="fw-medium bg-dark text-white text-uppercase text-center">
+                Actions
+              </th>
             </tr>
           </thead>
           <tbody class="bg-white" v-if="taxDeclarations.length != 0">
@@ -870,7 +967,7 @@ onMounted(() => {
               <td class="text-center">
                 <div class="dropdown">
                   <button
-                    class="btn btn-dark dropdown-toggle btn-lg"
+                    class="btn btn-primary dropdown-toggle btn-lg"
                     type="button"
                     id="dropdownMenuButton"
                     data-bs-toggle="dropdown"

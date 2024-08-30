@@ -26,6 +26,7 @@ const barangays = ref([]);
 const municipalities = ref([]);
 const owners = ref([]);
 const previousDeclarations = ref([]);
+const errors = ref({});
 
 const files = ref([]);
 const selectedFile = ref({
@@ -142,40 +143,45 @@ const viewFiles = () => {
 
 const submitRecord = () => {
   assign.value.user_id = parseInt(localStorage.getItem("id"));
+
   assign.value.taxRevision = assign.value.taxRevision || {};
   assign.value.barangay = assign.value.barangay || {};
   assign.value.municipality = assign.value.municipality || {};
 
   assign.value.barangay_id = assign.value.barangay.id;
   assign.value.municipality_id = assign.value.municipality.id;
+  assign.value.tax_revision_id = assign.value.taxRevision.ID;
 
-  createRecord(assign.value).then((data) => {
-    let record = data;
-    let date = moment(data.createdAt).format("MMMM DD, YYYY");
-    axios
-      .post("http://localhost:8080/move", {
-        fileName: selectedFile.value.name,
-        folderName:
-          assign.value.taxRevision.revisionNumber +
-          "/" +
-          assign.value.municipality.name +
-          "/" +
-          assign.value.barangay.name +
-          "/" +
-          assign.value.declaredOwner +
-          "/" +
-          assign.value.lotNo,
-      })
-      .then((response) => {
-        axios
-          .post("http://localhost:8081/tax-declaration/file-path", {
-            FilePath: response.data,
-            ID: data.ID,
-          })
-          .then(() => {
-            $toast.success("File assigned successfully");
-          });
-      });
+  createRecord(assign.value, errors).then((data) => {
+    if (data) {
+      let record = data;
+      let date = moment(data.createdAt).format("MMMM DD, YYYY");
+      axios
+        .post("http://localhost:8080/move", {
+          fileName: selectedFile.value.name,
+          folderName:
+            assign.value.taxRevision.revisionNumber +
+            "/" +
+            assign.value.municipality.name +
+            "/" +
+            assign.value.barangay.name +
+            "/" +
+            assign.value.declaredOwner +
+            "/" +
+            assign.value.lotNo,
+        })
+        .then((response) => {
+          axios
+            .post("http://localhost:8081/tax-declaration/file-path", {
+              FilePath: response.data,
+              ID: data.ID,
+            })
+            .then(() => {
+              errors.value = {};
+              $toast.success("File assigned successfully");
+            });
+        });
+    }
   });
 };
 
@@ -563,8 +569,17 @@ onMounted(() => {
                           v-model="assign.previousTaxDeclarationNo"
                           style="color: black"
                           class="bg-white text-uppercase"
+                          :class="{
+                            'border border-danger rounded':
+                              errors.previousTaxDeclarationNo,
+                          }"
                         >
                         </v-select>
+                        <div class="text-danger" v-auto-animate>
+                          <span v-if="errors.hasOwnProperty('previousTaxDeclarationNo')">
+                            {{ errors.previousTaxDeclarationNo }}
+                          </span>
+                        </div>
                       </div>
 
                       <div class="form-group mb-3 w-100">
@@ -579,7 +594,14 @@ onMounted(() => {
                           id="taxDeclarationNo"
                           class="form-control"
                           v-model="assign.taxDeclarationNo"
+                          :class="{ 'is-invalid': errors.taxDeclarationNo }"
                         />
+
+                        <div class="text-danger" v-auto-animate>
+                          <span v-if="errors.hasOwnProperty('taxDeclarationNo')">
+                            {{ errors.taxDeclarationNo }}
+                          </span>
+                        </div>
                       </div>
 
                       <div class="form-group w-100 mb-3 mt-2">
@@ -594,7 +616,14 @@ onMounted(() => {
                           id="propertyIdentificationNo"
                           class="form-control"
                           v-model="assign.propertyIdentificationNo"
+                          :class="{ 'is-invalid': errors.propertyIdentificationNo }"
                         />
+
+                        <div class="text-danger" v-auto-animate>
+                          <span v-if="errors.hasOwnProperty('propertyIdentificationNo')">
+                            {{ errors.propertyIdentificationNo }}
+                          </span>
+                        </div>
                       </div>
 
                       <div class="form-group w-100 mb-3 mt-2">
@@ -609,7 +638,14 @@ onMounted(() => {
                           id="lotNo"
                           class="form-control"
                           v-model="assign.lotNo"
+                          :class="{ 'is-invalid': errors.lotNo }"
                         />
+
+                        <div class="text-danger" v-auto-animate>
+                          <span v-if="errors.hasOwnProperty('lotNo')">
+                            {{ errors.lotNo }}
+                          </span>
+                        </div>
                       </div>
 
                       <div class="form-group w-100 mb-3 mt-2">
@@ -628,11 +664,19 @@ onMounted(() => {
                           v-model="assign.declaredOwner"
                           style="color: black"
                           class="bg-white text-uppercase"
+                          :class="{
+                            'border border-danger rounded': errors.declaredOwner,
+                          }"
                         >
                           <template #option="{ name }">
                             <h5 class="text-dark">{{ name }}</h5>
                           </template>
                         </v-select>
+                        <div class="text-danger" v-auto-animate>
+                          <span v-if="errors.hasOwnProperty('declaredOwner')">
+                            {{ errors.declaredOwner }}
+                          </span>
+                        </div>
                       </div>
 
                       <div class="form-group w-100 mb-3 mt-2">
@@ -647,15 +691,24 @@ onMounted(() => {
                           id=""
                           class="form-control"
                           v-model="assign.taxRevision"
+                          :class="{
+                            'is-invalid': errors.tax_revision_id,
+                          }"
                         >
                           <option
                             :value="revision"
                             v-for="revision in revisions"
                             :key="revision"
                           >
-                            {{ revision.revisionNumber }}
+                            ({{ revision.revisionNumber }}) / {{ revision.fromYear }} -
+                            {{ revision.toYear }} / {{ revision.percentage }}%
                           </option>
                         </select>
+                        <div class="text-danger" v-auto-animate>
+                          <span v-if="errors.hasOwnProperty('tax_revision_id')">
+                            {{ errors.tax_revision_id }}
+                          </span>
+                        </div>
                       </div>
 
                       <div class="form-group w-100 mb-3 mt-2">
@@ -671,12 +724,20 @@ onMounted(() => {
                           :options="municipalities"
                           @search="onMunicipalitySearch"
                           v-model="assign.municipality"
+                          :class="{
+                            'border border-danger rounded': errors.municipality_id,
+                          }"
                           style="color: black"
                         >
                           <template #option="{ name }">
                             <h5 class="text-dark">{{ name }}</h5>
                           </template>
                         </v-select>
+                        <div class="text-danger" v-auto-animate>
+                          <span v-if="errors.hasOwnProperty('municipality_id')">
+                            {{ errors.municipality_id }}
+                          </span>
+                        </div>
                       </div>
                       <div class="form-group w-100 mb-3 mt-2">
                         <label
@@ -691,12 +752,21 @@ onMounted(() => {
                           :options="barangays"
                           @search="onBarangaySearch"
                           v-model="assign.barangay"
+                          class="rounded"
+                          :class="{
+                            'border border-danger rounded': errors.barangay_id,
+                          }"
                           style="color: black"
                         >
                           <template #option="{ name }">
                             <h5 class="text-dark">{{ name }}</h5>
                           </template>
                         </v-select>
+                        <div class="text-danger" v-auto-animate>
+                          <span v-if="errors.hasOwnProperty('barangay_id')">
+                            {{ errors.barangay_id }}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </form>

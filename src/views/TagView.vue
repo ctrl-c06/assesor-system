@@ -144,12 +144,12 @@ onMounted(() => getAllTags());
                   class="form-control text-uppercase"
                   v-model="tag.name"
                   @keypress.enter.prevent="submitNewTag"
-                  :class="{ 'is-invalid': errors.hasOwnProperty('Name') }"
+                  :class="{ 'is-invalid': errors.hasOwnProperty('name') }"
                 />
 
                 <div class="text-danger" v-auto-animate>
-                  <span v-if="errors.hasOwnProperty('Name')">
-                    Description {{ errors.Name }}
+                  <span v-if="errors.hasOwnProperty('name')">
+                    {{ errors.name }}
                   </span>
                 </div>
               </div>
@@ -198,12 +198,12 @@ onMounted(() => getAllTags());
                   class="form-control text-uppercase"
                   v-model="tag.name"
                   @keypress.enter.prevent="updateTag"
-                  :class="{ 'is-invalid': errors.hasOwnProperty('Name') }"
+                  :class="{ 'is-invalid': errors.hasOwnProperty('name') }"
                 />
 
                 <div class="text-danger" v-auto-animate>
-                  <span v-if="errors.hasOwnProperty('Name')">
-                    Description {{ errors.Name }}
+                  <span v-if="errors.hasOwnProperty('name')">
+                    {{ errors.name }}
                   </span>
                 </div>
               </div>

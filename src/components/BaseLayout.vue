@@ -18,14 +18,17 @@ const logout = () => {
 };
 
 onMounted(() => {
-  axios
-    .get("http://localhost:8080/files")
-    .then((response) => {
-      unAssignedFilesCount.value = response.data.length;
-    })
-    .catch((error) => {
-      console.log(error);
-    });
+  // check if current route has dashboard
+  if (location.href.includes("dashboard")) {
+    axios
+      .get("http://localhost:8080/files")
+      .then((response) => {
+        unAssignedFilesCount.value = response.data.length;
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }
 });
 </script>
 <template>

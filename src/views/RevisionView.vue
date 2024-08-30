@@ -57,8 +57,6 @@ const submitRevision = () => {
       isLoading.value = false;
       if (error.response.status === 422) {
         errors.value = error.response.data;
-        revision.value.toYear = "";
-        revision.value.fromYear = "";
       }
     });
 };
@@ -172,12 +170,12 @@ onMounted(() => {
                   placeholder="Enter revision number"
                   v-model="revision.revisionNumber"
                   :class="{
-                    'is-invalid': errors.hasOwnProperty('RevisionNumber'),
+                    'is-invalid': errors.hasOwnProperty('revisionNumber'),
                   }"
                 />
                 <div v-auto-animate>
-                  <div class="text-danger" v-if="errors.hasOwnProperty('RevisionNumber')">
-                    Revision Number {{ errors.RevisionNumber }}
+                  <div class="text-danger" v-if="errors.hasOwnProperty('revisionNumber')">
+                    {{ errors.revisionNumber }}
                   </div>
                 </div>
               </div>
@@ -192,12 +190,12 @@ onMounted(() => {
                   placeholder="Enter from year"
                   v-model="revision.fromYear"
                   :class="{
-                    'is-invalid': errors.hasOwnProperty('FromYear'),
+                    'is-invalid': errors.hasOwnProperty('fromYear'),
                   }"
                 />
                 <div v-auto-animate>
-                  <div class="text-danger" v-if="errors.hasOwnProperty('FromYear')">
-                    FROM (YEAR) {{ errors.FromYear }}
+                  <div class="text-danger" v-if="errors.hasOwnProperty('fromYear')">
+                    {{ errors.fromYear }}
                   </div>
                 </div>
               </div>
@@ -212,12 +210,12 @@ onMounted(() => {
                   placeholder="Enter to year"
                   v-model="revision.toYear"
                   :class="{
-                    'is-invalid': errors.hasOwnProperty('ToYear'),
+                    'is-invalid': errors.hasOwnProperty('toYear'),
                   }"
                 />
                 <div v-auto-animate>
-                  <div class="text-danger" v-if="errors.hasOwnProperty('ToYear')">
-                    TO (YEAR) {{ errors.ToYear }}
+                  <div class="text-danger" v-if="errors.hasOwnProperty('toYear')">
+                    {{ errors.toYear }}
                   </div>
                 </div>
               </div>
@@ -234,13 +232,13 @@ onMounted(() => {
                   placeholder="Enter description"
                   v-model="revision.description"
                   :class="{
-                    'is-invalid': errors.hasOwnProperty('Description'),
+                    'is-invalid': errors.hasOwnProperty('description'),
                   }"
                 ></textarea>
 
                 <div v-auto-animate>
-                  <div class="text-danger" v-if="errors.hasOwnProperty('Description')">
-                    Description {{ errors.Description }}
+                  <div class="text-danger" v-if="errors.hasOwnProperty('description')">
+                    {{ errors.description }}
                   </div>
                 </div>
               </div>
@@ -257,12 +255,12 @@ onMounted(() => {
                   placeholder="Enter percentage"
                   v-model="revision.percentage"
                   :class="{
-                    'is-invalid': errors.hasOwnProperty('Percentage'),
+                    'is-invalid': errors.hasOwnProperty('percentage'),
                   }"
                 />
                 <div v-auto-animate>
-                  <div class="text-danger" v-if="errors.hasOwnProperty('Percentage')">
-                    Percentage {{ errors.Percentage }}
+                  <div class="text-danger" v-if="errors.hasOwnProperty('percentage')">
+                    percentage {{ errors.percentage }}
                   </div>
                 </div>
               </div>
@@ -320,12 +318,12 @@ onMounted(() => {
                   placeholder="Enter revision number"
                   v-model="selectedRevision.revisionNumber"
                   :class="{
-                    'is-invalid': errors.hasOwnProperty('RevisionNumber'),
+                    'is-invalid': errors.hasOwnProperty('revisionNumber'),
                   }"
                 />
                 <div v-auto-animate>
-                  <div class="text-danger" v-if="errors.hasOwnProperty('RevisionNumber')">
-                    Revision Number {{ errors.RevisionNumber }}
+                  <div class="text-danger" v-if="errors.hasOwnProperty('revisionNumber')">
+                    {{ errors.revisionNumber }}
                   </div>
                 </div>
               </div>
@@ -340,12 +338,12 @@ onMounted(() => {
                   placeholder="Enter from year"
                   v-model="selectedRevision.fromYear"
                   :class="{
-                    'is-invalid': errors.hasOwnProperty('FromYear'),
+                    'is-invalid': errors.hasOwnProperty('fromYear'),
                   }"
                 />
                 <div v-auto-animate>
-                  <div class="text-danger" v-if="errors.hasOwnProperty('FromYear')">
-                    FROM (YEAR) {{ errors.FromYear }}
+                  <div class="text-danger" v-if="errors.hasOwnProperty('fromYear')">
+                    {{ errors.fromYear }}
                   </div>
                 </div>
               </div>
@@ -360,12 +358,12 @@ onMounted(() => {
                   placeholder="Enter to year"
                   v-model="selectedRevision.toYear"
                   :class="{
-                    'is-invalid': errors.hasOwnProperty('ToYear'),
+                    'is-invalid': errors.hasOwnProperty('toYear'),
                   }"
                 />
                 <div v-auto-animate>
-                  <div class="text-danger" v-if="errors.hasOwnProperty('ToYear')">
-                    TO (YEAR) {{ errors.ToYear }}
+                  <div class="text-danger" v-if="errors.hasOwnProperty('toYear')">
+                    {{ errors.toYear }}
                   </div>
                 </div>
               </div>
@@ -382,12 +380,12 @@ onMounted(() => {
                   placeholder="Enter description"
                   v-model="selectedRevision.description"
                   :class="{
-                    'is-invalid': errors.hasOwnProperty('Description'),
+                    'is-invalid': errors.hasOwnProperty('description'),
                   }"
                 ></textarea>
                 <div v-auto-animate>
-                  <div class="text-danger" v-if="errors.hasOwnProperty('Description')">
-                    Revision Number {{ errors.Description }}
+                  <div class="text-danger" v-if="errors.hasOwnProperty('description')">
+                    {{ errors.description }}
                   </div>
                 </div>
               </div>
@@ -404,12 +402,12 @@ onMounted(() => {
                   placeholder="Enter percentage"
                   v-model="selectedRevision.percentage"
                   :class="{
-                    'is-invalid': errors.hasOwnProperty('Percentage'),
+                    'is-invalid': errors.hasOwnProperty('percentage'),
                   }"
                 />
                 <div v-auto-animate>
-                  <div class="text-danger" v-if="errors.hasOwnProperty('Percentage')">
-                    Revision Number {{ errors.Percentage }}
+                  <div class="text-danger" v-if="errors.hasOwnProperty('percentage')">
+                    {{ errors.percentage }}
                   </div>
                 </div>
               </div>

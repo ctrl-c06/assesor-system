@@ -38,6 +38,7 @@ const createUser = () => {
     .post(`http://localhost:8081/users`, user.value)
     .then((response) => {
       $toast.success("User created successfully");
+      errors.value = {};
       clearForm();
       getUsers();
     })
@@ -60,6 +61,7 @@ const getUsers = () => {
 };
 
 const editUser = (user) => {
+  user.password = "";
   selectedUser.value = user;
 };
 
@@ -138,12 +140,12 @@ onMounted(() => getUsers());
                 class="form-control"
                 v-model="user.employee_id"
                 placeholder="e.g. 4994"
-                :class="{ 'is-invalid': errors.hasOwnProperty('EmployeeID') }"
+                :class="{ 'is-invalid': errors.hasOwnProperty('employee_id') }"
               />
 
               <div class="text-danger" v-auto-animate>
-                <span v-if="errors.hasOwnProperty('EmployeeID')">
-                  Employee ID {{ errors.EmployeeID }}
+                <span v-if="errors.hasOwnProperty('employee_id')">
+                  {{ errors.employee_id }}
                 </span>
               </div>
             </div>
@@ -156,12 +158,12 @@ onMounted(() => getUsers());
                 class="form-control"
                 v-model="user.username"
                 placeholder="e.g. user1"
-                :class="{ 'is-invalid': errors.hasOwnProperty('Username') }"
+                :class="{ 'is-invalid': errors.hasOwnProperty('username') }"
               />
 
               <div class="text-danger" v-auto-animate>
-                <span v-if="errors.hasOwnProperty('Username')">
-                  Username {{ errors.Username }}
+                <span v-if="errors.hasOwnProperty('username')">
+                  {{ errors.username }}
                 </span>
               </div>
             </div>
@@ -174,12 +176,12 @@ onMounted(() => getUsers());
                 class="form-control"
                 v-model="user.password"
                 placeholder="********"
-                :class="{ 'is-invalid': errors.hasOwnProperty('Password') }"
+                :class="{ 'is-invalid': errors.hasOwnProperty('password') }"
               />
 
               <div class="text-danger" v-auto-animate>
-                <span v-if="errors.hasOwnProperty('Password')">
-                  Password {{ errors.Password }}
+                <span v-if="errors.hasOwnProperty('password')">
+                  {{ errors.password }}
                 </span>
               </div>
             </div>
@@ -187,10 +189,19 @@ onMounted(() => getUsers());
               <label for="access_level" class="form-label text-uppercase fw-bold h5"
                 >Access Level</label
               >
-              <select class="form-select" v-model="user.access_level">
+              <select
+                class="form-select"
+                v-model="user.access_level"
+                :class="{ 'is-invalid': errors.hasOwnProperty('access_level') }"
+              >
                 <option value="2">User</option>
                 <option value="1">Administrator</option>
               </select>
+              <div class="text-danger" v-auto-animate>
+                <span v-if="errors.hasOwnProperty('access_level')">
+                  {{ errors.access_level }}
+                </span>
+              </div>
             </div>
           </form>
         </div>
@@ -238,12 +249,12 @@ onMounted(() => getUsers());
                 class="form-control"
                 v-model="selectedUser.employee_id"
                 placeholder="e.g. 4994"
-                :class="{ 'is-invalid': errors.hasOwnProperty('EmployeeID') }"
+                :class="{ 'is-invalid': errors.hasOwnProperty('employee_id') }"
               />
 
               <div class="text-danger" v-auto-animate>
-                <span v-if="errors.hasOwnProperty('EmployeeID')">
-                  Employee ID {{ errors.EmployeeID }}
+                <span v-if="errors.hasOwnProperty('employee_id')">
+                  {{ errors.employee_id }}
                 </span>
               </div>
             </div>
@@ -256,12 +267,12 @@ onMounted(() => getUsers());
                 class="form-control"
                 v-model="selectedUser.username"
                 placeholder="e.g. user1"
-                :class="{ 'is-invalid': errors.hasOwnProperty('Username') }"
+                :class="{ 'is-invalid': errors.hasOwnProperty('username') }"
               />
 
               <div class="text-danger" v-auto-animate>
-                <span v-if="errors.hasOwnProperty('Username')">
-                  Username {{ errors.Username }}
+                <span v-if="errors.hasOwnProperty('username')">
+                  {{ errors.username }}
                 </span>
               </div>
             </div>
@@ -273,13 +284,13 @@ onMounted(() => getUsers());
               <input
                 type="password"
                 class="form-control"
-                v-model="user.password"
+                v-model="selectedUser.password"
                 placeholder="********"
-                :class="{ 'is-invalid': errors.hasOwnProperty('Password') }"
+                :class="{ 'is-invalid': errors.hasOwnProperty('password') }"
               />
               <div class="text-danger" v-auto-animate>
-                <span v-if="errors.hasOwnProperty('Password')">
-                  Password {{ errors.Password }}
+                <span v-if="errors.hasOwnProperty('password')">
+                  {{ errors.password }}
                 </span>
               </div>
             </div>
