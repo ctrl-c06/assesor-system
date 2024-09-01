@@ -33,7 +33,7 @@ const fromDate = ref("");
 const toDate = ref("");
 
 const currentPage = ref(1);
-const pageSize = ref(5);
+const pageSize = ref(10);
 const totalPages = ref(1);
 const isFetching = ref(false);
 const totalRecords = ref(0);
@@ -139,27 +139,38 @@ const searchMunicipality = (loading, search) => {
     });
 };
 
+let ownerSearchDebounce = null;
 const onOwnerSearch = (search, loading) => {
   if (search.length) {
     loading(true);
-    searchOwner(loading, search);
+    clearTimeout(ownerSearchDebounce);
+    ownerSearchDebounce = setTimeout(() => {
+      searchOwner(loading, search);
+    }, 500);
   }
 };
 
+let barangayTimer = null;
 const onBarangaySearch = (search, loading) => {
   if (search.length) {
     loading(true);
-    searchBarangay(loading, search);
+    clearTimeout(barangayTimer);
+    barangayTimer = setTimeout(() => {
+      searchBarangay(loading, search);
+    }, 500);
   }
 };
 
+let municipalityDebounceTimer = null;
 const onMunicipalitySearch = (search, loading) => {
   if (search.length) {
     loading(true);
-    searchMunicipality(loading, search);
+    clearTimeout(municipalityDebounceTimer);
+    municipalityDebounceTimer = setTimeout(() => {
+      searchMunicipality(loading, search);
+    }, 500);
   }
 };
-
 watch(selectedBarangay, () => {
   if (selectedBarangay.value) {
     fetchTaxDeclarations(1, pageSize.value);
@@ -192,8 +203,12 @@ watch(toDate, () => {
   fetchTaxDeclarations(1, pageSize.value);
 });
 
+let debounceTimer = null;
 watch(identificationSearch, () => {
-  fetchTaxDeclarations(1, pageSize.value);
+  clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(() => {
+    fetchTaxDeclarations(1, pageSize.value);
+  }, 500);
 });
 
 const assign = ref({
@@ -380,7 +395,7 @@ onMounted(() => {
       <div class="border my-2 border-primary"></div>
     </template>
 
-    <!-- <div
+    <div
       v-if="isFetching"
       class="d-flex justify-content-center align-items-center bg-dark"
       style="
@@ -394,12 +409,12 @@ onMounted(() => {
       "
     >
       <div class="d-flex flex-column align-items-center justify-content-center">
-        <div class="spinner-border text-white" role="status"> 
+        <div class="spinner-border text-white" role="status">
           <span class="visually-hidden">Loading...</span>
         </div>
         <h4 class="text-white mt-2">Fetching Records</h4>
       </div>
-    </div> -->
+    </div>
 
     <div>
       <div

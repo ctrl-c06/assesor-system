@@ -1,27 +1,56 @@
 <script setup>
 import Layout from "@/components/BaseLayout.vue";
 import { onMounted, ref } from "vue";
-import { useToast } from "vue-toast-notification";
 import axios from "axios";
-import alertify from "alertifyjs";
-import moment from "moment";
+import { useToast } from "vue-toast-notification";
 
 const $toast = useToast();
-const revisions = ref([]);
-const getRevisions = () => {
+const user = ref({});
+const usernameErrors = ref({});
+const passwordErrors = ref({});
+
+const password = ref({
+  old: "",
+  new: "",
+  confirm: "",
+});
+
+const changeUsername = () => {
   axios
-    .get("http://localhost:8081/tax-revisions")
-    .then((response) => {
-      console.log(response.data);
-      revisions.value = response.data;
+    .post(`http://localhost:8081/user/change-username/${localStorage.getItem("id")}`, {
+      username: user.value.username,
     })
-    .catch((error) => {
-      console.error(error);
+    .then((response) => {
+      $toast.success("Username has been changed successfully");
+    })
+    .catch((err) => {
+      if (err.response.status === 422) {
+        usernameErrors.value = err.response.data;
+      }
+    });
+};
+const changePassword = () => {
+  axios
+    .post(`http://localhost:8081/user/change-password/${localStorage.getItem("id")}`, {
+      oldPassword: password.value.old,
+      newPassword: password.value.new,
+      confirmPassword: password.value.confirm,
+    })
+    .then((response) => {
+      passwordErrors.value = {};
+      $toast.success("Password has been changed successfully");
+    })
+    .catch((err) => {
+      passwordErrors.value = err.response.data;
     });
 };
 
 onMounted(() => {
-  getRevisions();
+  axios
+    .get(`http://localhost:8081/user/${localStorage.getItem("id")}`)
+    .then((response) => {
+      user.value = response.data;
+    });
 });
 </script>
 
@@ -59,16 +88,6 @@ onMounted(() => {
               >
                 Password
               </a>
-              <a
-                class="list-group-item list-group-item-action"
-                data-bs-toggle="list"
-                href="#revisions"
-                role="tab"
-                aria-selected="false"
-                tabindex="-1"
-              >
-                Revisions
-              </a>
             </div>
           </div>
         </div>
@@ -81,29 +100,37 @@ onMounted(() => {
                   <h5 class="card-title mb-0">Information</h5>
                 </div>
                 <div class="card-body">
-                  <form>
-                    <div class="row">
-                      <div class="col-md-12">
-                        <div class="mb-3">
-                          <label class="form-label" for="inputUsername">Username</label>
-                          <input
-                            type="text"
-                            class="form-control"
-                            id="inputUsername"
-                            placeholder="Username"
-                          />
+                  <div class="row">
+                    <div class="col-md-12">
+                      <div class="mb-3">
+                        <label class="form-label" for="inputUsername">Username</label>
+                        <input
+                          type="text"
+                          class="form-control"
+                          id="inputUsername"
+                          placeholder="Username"
+                          v-model="user.username"
+                          :class="{ 'is-invalid': usernameErrors.username }"
+                        />
+                        <div
+                          class="invalid-feedback"
+                          v-if="usernameErrors?.hasOwnProperty('username')"
+                        >
+                          {{ usernameErrors.username }}
                         </div>
                       </div>
                     </div>
+                  </div>
 
-                    <button type="submit" class="btn btn-primary">Save changes</button>
-                  </form>
+                  <button type="button" class="btn btn-primary" @click="changeUsername">
+                    Save changes
+                  </button>
                 </div>
               </div>
 
               <div class="card">
                 <div class="card-header">
-                  <h5 class="card-title mb-0">Private info</h5>
+                  <h5 class="card-title mb-0">Personal info</h5>
                 </div>
                 <div class="card-body">
                   <form>
@@ -115,6 +142,8 @@ onMounted(() => {
                           class="form-control"
                           id="inputFirstName"
                           placeholder="First name"
+                          readonly
+                          v-model="user.first_name"
                         />
                       </div>
                       <div class="mb-3 col-md-4">
@@ -124,6 +153,8 @@ onMounted(() => {
                           class="form-control"
                           id="inputLastName"
                           placeholder="Last name"
+                          readonly
+                          v-model="user.last_name"
                         />
                       </div>
 
@@ -136,31 +167,48 @@ onMounted(() => {
                           class="form-control"
                           id="inputMiddlename"
                           placeholder="Middle name"
+                          readonly
+                          v-model="user.middle_name"
                         />
                       </div>
                     </div>
-                    <div class="row">
-                      <div class="mb-3 col-lg-6">
+                    <!-- <div class="row">
+                      <div class="mb-3 col-lg-4">
                         <label class="form-label" for="inputPosition">Position</label>
                         <input
                           type="text"
                           class="form-control"
                           id="inputPosition"
                           placeholder="Position"
+                          v-model="user.position"
                         />
                       </div>
 
-                      <div class="mb-3 col-lg-6">
-                        <label class="form-label" for="inputOffice">Office</label>
+                      <div class="mb-3 col-lg-4">
+                        <label class="form-label" for="inputOffice"
+                          >Office Charging</label
+                        >
                         <input
                           type="text"
                           class="form-control"
                           id="inputOffice"
                           placeholder="Office"
+                          v-model="user.office_charging"
                         />
                       </div>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Save changes</button>
+                      <div class="mb-3 col-lg-4">
+                        <label class="form-label" for="inputOfficeAssignment"
+                          >Office Assignment</label
+                        >
+                        <input
+                          type="text"
+                          class="form-control"
+                          id="inputOfficeAssignment"
+                          placeholder="Office"
+                          v-model="user.office_assignment"
+                        />
+                      </div>
+                    </div> -->
                   </form>
                 </div>
               </div>
@@ -170,77 +218,61 @@ onMounted(() => {
                 <div class="card-body">
                   <h5 class="card-title">Password</h5>
 
-                  <form>
-                    <div class="mb-3">
-                      <label class="form-label" for="inputPasswordCurrent"
-                        >Current password</label
-                      >
-                      <input
-                        type="password"
-                        class="form-control"
-                        id="inputPasswordCurrent"
-                      />
+                  <div class="mb-3">
+                    <label class="form-label" for="inputPasswordCurrent"
+                      >Current password</label
+                    >
+                    <input
+                      type="password"
+                      class="form-control"
+                      id="inputPasswordCurrent"
+                      v-model="password.old"
+                      :class="{ 'is-invalid': passwordErrors.oldPassword }"
+                    />
+                    <div
+                      class="invalid-feedback"
+                      v-if="passwordErrors?.hasOwnProperty('oldPassword')"
+                    >
+                      {{ passwordErrors.oldPassword }}
                     </div>
-                    <div class="mb-3">
-                      <label class="form-label" for="inputPasswordNew"
-                        >New password</label
-                      >
-                      <input type="password" class="form-control" id="inputPasswordNew" />
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label" for="inputPasswordNew">New password</label>
+                    <input
+                      type="password"
+                      class="form-control"
+                      id="inputPasswordNew"
+                      v-model="password.new"
+                      :class="{ 'is-invalid': passwordErrors.newPassword }"
+                    />
+                    <div
+                      class="invalid-feedback"
+                      v-if="passwordErrors?.hasOwnProperty('newPassword')"
+                    >
+                      {{ passwordErrors.newPassword }}
                     </div>
-                    <div class="mb-3">
-                      <label class="form-label" for="inputPasswordNew2"
-                        >Verify password</label
-                      >
-                      <input
-                        type="password"
-                        class="form-control"
-                        id="inputPasswordNew2"
-                      />
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label" for="inputPasswordNew2"
+                      >Confirm password</label
+                    >
+                    <input
+                      type="password"
+                      class="form-control"
+                      id="inputPasswordNew2"
+                      v-model="password.confirm"
+                      :class="{ 'is-invalid': passwordErrors.confirmPassword }"
+                    />
+                    <div
+                      class="invalid-feedback"
+                      v-if="passwordErrors?.hasOwnProperty('confirmPassword')"
+                    >
+                      {{ passwordErrors.confirmPassword }}
                     </div>
-                    <button type="submit" class="btn btn-primary">Save changes</button>
-                  </form>
-                </div>
-              </div>
-            </div>
-            <div class="tab-pane fade" id="revisions" role="tabpanel">
-              <div class="card">
-                <div class="card-body">
-                  <h5 class="card-title">Current Selected Revision</h5>
-                  <table class="table">
-                    <thead>
-                      <tr>
-                        <th class="fw-bold border border-dark bg-dark text-white">
-                          Revision Number
-                        </th>
-                        <th class="fw-bold border border-dark bg-dark text-white">
-                          Years
-                        </th>
-                        <th class="fw-bold border border-dark bg-dark text-white">
-                          Description
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr v-for="revision in revisions" :key="revision">
-                        <td>
-                          <label class="form-check">
-                            <input
-                              class="form-check-input"
-                              type="radio"
-                              value="option1"
-                              name="radios-example"
-                              checked=""
-                            />
-                            {{ revision.revisionNumber }}
-                          </label>
-                        </td>
-                        <td>{{ revision.fromYear }} - {{ revision.toYear }}</td>
-                        <td>{{ revision.description }}</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                  <!-- button for save changes -->
-                  <button type="submit" class="btn btn-primary">Save changes</button>
+                  </div>
+                  <button type="submit" class="btn btn-primary" @click="changePassword">
+                    Save changes
+                  </button>
                 </div>
               </div>
             </div>

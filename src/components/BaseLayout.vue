@@ -18,17 +18,14 @@ const logout = () => {
 };
 
 onMounted(() => {
-  // check if current route has dashboard
-  if (location.href.includes("dashboard")) {
-    axios
-      .get("http://localhost:8080/files")
-      .then((response) => {
-        unAssignedFilesCount.value = response.data.length;
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  }
+  axios
+    .get("http://localhost:8080/files")
+    .then((response) => {
+      unAssignedFilesCount.value = response.data.length;
+    })
+    .catch((error) => {
+      console.log(error);
+    });
 });
 </script>
 <template>
@@ -75,9 +72,10 @@ onMounted(() => {
                 <span class="text-uppercase">{{ username }} </span>
               </a>
               <div class="dropdown-menu dropdown-menu-start">
-                <a class="dropdown-item" href="pages-profile.html"
-                  ><i class="align-middle me-1" data-feather="user"></i> Profile</a
-                >
+                <RouterLink class="dropdown-item" to="/settings"
+                  ><i class="align-middle me-1" data-feather="user"></i>
+                  Profile
+                </RouterLink>
 
                 <div class="dropdown-divider"></div>
                 <button class="dropdown-item" @click="logout">Log out</button>
@@ -191,8 +189,8 @@ onMounted(() => {
             </ul>
           </li>
 
-          <li class="sidebar-header">Application</li>
-          <li class="sidebar-item">
+          <!-- <li class="sidebar-header">Application</li> -->
+          <!-- <li class="sidebar-item">
             <RouterLink class="sidebar-link" to="/settings">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -208,7 +206,7 @@ onMounted(() => {
               </svg>
               <span class="align-middle">Settings</span>
             </RouterLink>
-          </li>
+          </li> -->
         </ul>
       </div>
     </nav>

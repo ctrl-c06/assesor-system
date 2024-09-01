@@ -151,6 +151,7 @@ const submitRecord = () => {
   assign.value.barangay_id = assign.value.barangay.id;
   assign.value.municipality_id = assign.value.municipality.id;
   assign.value.tax_revision_id = assign.value.taxRevision.ID;
+  assign.value.previousTaxDeclarationNo = assign.value.previousTaxDeclarationNo || "";
 
   createRecord(assign.value, errors).then((data) => {
     if (data) {
@@ -174,7 +175,7 @@ const submitRecord = () => {
           axios
             .post("http://localhost:8081/tax-declaration/file-path", {
               FilePath: response.data,
-              ID: data.ID,
+              ID: data.taxDeclaration.ID,
             })
             .then(() => {
               errors.value = {};

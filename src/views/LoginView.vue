@@ -42,7 +42,14 @@ onMounted(() => {
 });
 </script>
 <template>
-  <body>
+  <body
+    style="
+      background: url('/src/assets/img/login-bg.png') bottom right;
+      background-repeat: no-repeat;
+      background-color: white;
+      background-size: fill;
+    "
+  >
     <div class="container">
       <div class="row vh-100 d-flex justify-content-center">
         <div class="col-12 align-self-center">
