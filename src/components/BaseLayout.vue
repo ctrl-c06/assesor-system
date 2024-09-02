@@ -149,6 +149,11 @@ onMounted(() => {
               <li class="sidebar-item">
                 <Router-Link class="sidebar-link" to="/users">Users</Router-Link>
               </li>
+              <li class="sidebar-item">
+                <Router-Link class="sidebar-link" to="/municipalities"
+                  >Municipalities</Router-Link
+                >
+              </li>
             </ul>
           </li>
           <li class="sidebar-item">
