@@ -61,13 +61,13 @@ const router = createRouter({
 
 
 router.beforeEach((to, from, next) => {
-  const publicPages = ['/login', '/'];
-  const authRequired = !publicPages.includes(to.path);
-  const loggedIn = localStorage.getItem('isLogin') && localStorage.getItem('username') && localStorage.getItem('id');
+  // const publicPages = ['/login', '/'];
+  // const authRequired = !publicPages.includes(to.path);
+  // const loggedIn = localStorage.getItem('isLogin') && localStorage.getItem('username') && localStorage.getItem('id');
 
-  if (authRequired && !loggedIn) {
-    return next('/login');
-  }
+  // if (authRequired && !loggedIn) {
+  //   return next('/login');
+  // }
 
   next();
 }

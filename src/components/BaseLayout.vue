@@ -74,7 +74,7 @@ onMounted(() => {
               <div class="dropdown-menu dropdown-menu-start">
                 <RouterLink class="dropdown-item" to="/settings"
                   ><i class="align-middle me-1" data-feather="user"></i>
-                  Profile
+                  Account Settings
                 </RouterLink>
 
                 <div class="dropdown-divider"></div>

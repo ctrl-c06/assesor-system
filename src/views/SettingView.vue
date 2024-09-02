@@ -135,7 +135,7 @@ onMounted(() => {
                 <div class="card-body">
                   <form>
                     <div class="row">
-                      <div class="mb-3 col-md-4">
+                      <div class="mb-3 col-md-3">
                         <label class="form-label" for="inputFirstName">First name</label>
                         <input
                           type="text"
@@ -146,7 +146,7 @@ onMounted(() => {
                           v-model="user.first_name"
                         />
                       </div>
-                      <div class="mb-3 col-md-4">
+                      <div class="mb-3 col-md-3">
                         <label class="form-label" for="inputLastName">Last name</label>
                         <input
                           type="text"
@@ -158,7 +158,7 @@ onMounted(() => {
                         />
                       </div>
 
-                      <div class="mb-3 col-md-4">
+                      <div class="mb-3 col-md-3">
                         <label class="form-label" for="inputMiddlename"
                           >Middle name</label
                         >
@@ -171,32 +171,57 @@ onMounted(() => {
                           v-model="user.middle_name"
                         />
                       </div>
+                      <div class="mb-3 col-md-3">
+                        <label class="form-label" for="inputSuffix">Suffix</label>
+                        <input
+                          type="text"
+                          class="form-control"
+                          id="inputSuffix"
+                          placeholder="N/A"
+                          readonly
+                          v-model="user.suffix"
+                        />
+                      </div>
                     </div>
-                    <!-- <div class="row">
-                      <div class="mb-3 col-lg-4">
+                    <div class="row">
+                      <div class="mb-3 col-lg-3">
                         <label class="form-label" for="inputPosition">Position</label>
                         <input
                           type="text"
                           class="form-control"
                           id="inputPosition"
+                          readonly
                           placeholder="Position"
-                          v-model="user.position"
+                          v-model="user.position_description"
                         />
                       </div>
-
-                      <div class="mb-3 col-lg-4">
+                      <div class="mb-3 col-lg-3">
+                        <label class="form-label" for="inputWorkStatus"
+                          >Work Status</label
+                        >
+                        <input
+                          type="text"
+                          class="form-control"
+                          readonly
+                          id="inputWorkStatus"
+                          placeholder="Work Status"
+                          v-model="user.work_status"
+                        />
+                      </div>
+                      <div class="mb-3 col-lg-3">
                         <label class="form-label" for="inputOffice"
                           >Office Charging</label
                         >
                         <input
                           type="text"
                           class="form-control"
+                          readonly
                           id="inputOffice"
                           placeholder="Office"
                           v-model="user.office_charging"
                         />
                       </div>
-                      <div class="mb-3 col-lg-4">
+                      <div class="mb-3 col-lg-3">
                         <label class="form-label" for="inputOfficeAssignment"
                           >Office Assignment</label
                         >
@@ -204,11 +229,12 @@ onMounted(() => {
                           type="text"
                           class="form-control"
                           id="inputOfficeAssignment"
+                          readonly
                           placeholder="Office"
                           v-model="user.office_assignment"
                         />
                       </div>
-                    </div> -->
+                    </div>
                   </form>
                 </div>
               </div>
